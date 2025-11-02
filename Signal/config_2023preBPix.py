@@ -2,11 +2,11 @@
 signalScriptCfg = {
 
   # Setup
-  'inputWSDir':'/eos/user/r/rkumarag/OutputForFinalFit_WithOutSyst/workspaces/2023preBPix/ws_signal/', # dir storing flashgg workspaces
+  'inputWSDir':'/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces/2023preBPix/ws_signal/', # dir storing flashgg workspaces
   'procs':'auto', # if auto: inferred automatically from filenames (requires names to be of from *pythia8_{PROC}.root)
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   #'ext':'earlyAnalysis_freeze_include', # output directory extension
-  'ext':'tth_th_analysis_2023preBPix', # output directory extension
+  'ext':'tth_th_analysis_2023preBPix_StatOnly', # output directory extension
   'analysis':'tth_th_analysis', # To specify replacement dataset and XS*BR mapping (defined in ./tools/replacementMap.py and ./tools/XSBRMap.py respectively)
   'year':'2023preBPix', # Use 'combined' if merging all years: not recommended
   'massPoints':'125', # You can now run with a single mass point if necessary
