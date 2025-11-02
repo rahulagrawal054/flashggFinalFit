@@ -18,7 +18,8 @@ echo ">>> Setting up environment..."
 source ../setup.sh
 
 # Define eras
-eras=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+#eras=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+eras=(2022preEE)
 
 # Create log folder
 mkdir -p logs
@@ -41,6 +42,15 @@ for era in "${eras[@]}"; do
       echo "❌ fTest failed for $era"; exit 1;
     }
 
+  # calcPhotonSyst
+  echo ">>> Running calcPhotonSyst for $era..."
+  { time python3 RunSignalScripts.py \
+    --inputConfig config_${era}.py \
+    --mode calcPhotonSyst
+    2>&1 | tee logs/calcPhotonSyst_${era}.log; } || {
+      echo "�~]~calcPhotonSyst failed for $era"; exit 1;
+    }
+
   # SignalFit
   echo ">>> Running signalFit for $era..."
   { time python3 RunSignalScripts.py \
@@ -59,7 +69,7 @@ done
 echo ">>> Collecting all workspaces..."
 mkdir -p ./all_eras_ws_signal
 for era in "${eras[@]}"; do
-  for f in /eos/user/r/rkumarag/OutputForFinalFit_WithOutSyst/workspaces/${era}/ws_signal/*.root; do
+  for f in /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces/${era}/ws_signal/*.root; do
     base=$(basename "$f" .root)
     cp -v "$f" ./all_eras_ws_signal/${base}_${era}.root
   done
@@ -72,11 +82,12 @@ echo ">>> Running RunPackager..."
 { time python3 RunPackager.py \
   --cats auto \
   --inputWSDir ./all_eras_ws_signal \
-  --exts tth_th_analysis_2022preEE,tth_th_analysis_2022postEE,tth_th_analysis_2023preBPix,tth_th_analysis_2023postBPix \
+  --exts tth_th_analysis_2022preEE_StatOnly,tth_th_analysis_2022postEE_StatOnly,tth_th_analysis_2023preBPix_StatOnly,tth_th_analysis_2023postBPix_StatOnly \
   --mergeYears \
   --massPoints 125 \
   --batch local \
   --mergeYears \
+  --outputExt _StatOnly \
   2>&1 | tee logs/packager.log; } || {
     echo "❌ Packager failed!"; exit 1;
   }
@@ -91,7 +102,7 @@ for cat in "${cats[@]}"; do
     --procs all \
     --years 2022preEE,2022postEE,2023preBPix,2023postBPix \
     --cats $cat \
-    --ext packaged \
+    --ext packaged_StatOnly \
     2>&1 | tee logs/plot_${cat}.log; } || {
       echo "❌ Plotting failed for $cat"; exit 1;
     }
