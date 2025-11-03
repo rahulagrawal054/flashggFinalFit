@@ -1,7 +1,7 @@
 source ../setup.sh
 
 # where to write your per-era workspaces
-BASE_WS_DIR=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces
+BASE_WS_DIR=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/workspaces
 
 # wipe out old outputs and recreate base dir
 mkdir -p "${BASE_WS_DIR}"
@@ -19,7 +19,7 @@ for era in "${eras[@]}"; do
   # 1) signal modes
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/ttH_${era}/output_TTHToGG_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/ttH_${era}/output_TTHToGG_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode tth \
     --year "${era}" \
@@ -27,7 +27,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/tHqLep_${era}/output_THQtoGG_lep_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/tHqLep_${era}/output_THQtoGG_lep_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode tHqLep \
     --year "${era}" \
@@ -35,7 +35,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/tHqHad_${era}/output_THQtoGG_had_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/tHqHad_${era}/output_THQtoGG_had_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode tHqHad \
     --year "${era}" \
@@ -43,7 +43,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
    --inputConfig config_ttH_tH_2022_2023.py \
-   --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/tHW_${era}/output_THWtoGG_M125_13TeV_madgraph_pythia8.root \
+   --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/tHW_${era}/output_THWtoGG_M125_13TeV_madgraph_pythia8.root \
    --inputMass 125 \
    --productionMode tHW \
    --year "${era}" \
@@ -52,7 +52,7 @@ for era in "${eras[@]}"; do
   # 2) resonant backgrounds
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/VH_${era}/output_VHToGG_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/VH_${era}/output_VHToGG_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode vh \
     --year "${era}" \
@@ -60,7 +60,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/GluGluH_${era}/output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/GluGluH_${era}/output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8.root \
     --inputMass 125 \
     --productionMode ggh \
     --year "${era}" \
@@ -68,7 +68,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/VBFH_${era}/output_VBFHToGG_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/VBFH_${era}/output_VBFHToGG_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode vbf \
     --year "${era}" \
@@ -76,7 +76,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/bbH_${era}/output_BBHToGG_M125_13TeV_powheg_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/bbH_${era}/output_BBHToGG_M125_13TeV_powheg_pythia8.root \
     --inputMass 125 \
     --productionMode bbh \
     --year "${era}" \
@@ -88,12 +88,14 @@ for era in "${eras[@]}"; do
 
 done
 
-#mkdir -p /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces/Data
+mkdir -p /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/workspaces/Data
 ## 3) data (same file each time, but we generate a per‐era workspace)
 ## the "older" data contains almost the full corrections, ok for now
 #python3 trees2ws_data.py \
 #--inputConfig config_ttH_tH_2022_2023.py \
-#--inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/root/Data/allData.root \
-#--outputWSDir /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces/Data
+#--inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/root/Data/allData.root \
+#--outputWSDir /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/workspaces/Data \
+#--applyMassCut \
+#--massCutRange 100,180
 
 echo ">>> All done!"
