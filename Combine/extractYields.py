@@ -19,19 +19,22 @@ def rooiter(x):
     ret = iter.Next()
 
 def procToProcS0(p):
-  p = p.lower()
-  # Specific matches for tHq to avoid merging
-  if "thqhad" in p: return "thqhad_incl"
-  elif "thqlep" in p: return "thqlep_incl"
-  
-  # Matches for the other 6 processes
-  elif "ggh" in p: return "ggh_incl"
-  elif "vbf" in p: return "vbf_incl"
-  elif "bbh" in p: return "bbh_incl"
-  elif "tth" in p: return "tth_incl"
-  elif "thw" in p: return "thw_incl"
-  elif "vh" in p: return "vh_incl"
-
+  p = p.lower() # Convert to lowercase once at the start
+  if "ggh" in p: return "ggh"
+  elif "qqh" in p: return "qqh"
+  elif "vbf" in p: return "qqh"
+  elif "wh_had" in p: return "wh"
+  elif "vh" in p: return "wh"
+  elif "zh_had" in p: return "zh"
+  elif "ggzh_had" in p: return "ggzh"
+  elif "wh_lep" in p: return "wh"
+  elif "zh_lep" in p: return "zh"
+  elif "ggzh_ll" in p: return "ggzh"
+  elif "ggzh_nunu" in p: return "ggzh"
+  elif "tth" in p: return "tth"
+  elif "thq" in p: return "thq"
+  elif "thw" in p: return "thw"
+  elif "bbh" in p: return "bbh"
   else: 
     print(" --> [ERROR] proc s0 not realised for process %s. Leaving"%p)
     exit(0)
