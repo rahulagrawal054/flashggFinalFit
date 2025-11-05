@@ -19,19 +19,22 @@ def rooiter(x):
     ret = iter.Next()
 
 def procToProcS0(p):
-  if "ggH" in p: return "ggh"
-  elif "qqH" in p: return "qqh"
+  p = p.lower()
+  if "ggh" in p: return "ggh"
+  elif "qqh" in p: return "qqh"
+  elif "vbf" in p: return "qqh"
   elif "WH_had" in p: return "wh"
+  elif "vh" in p: return "wh"
   elif "ZH_had" in p: return "zh"
   elif "ggZH_had" in p: return "ggzh"
   elif "WH_lep" in p: return "wh"
   elif "ZH_lep" in p: return "zh"
   elif "ggZH_ll" in p: return "ggzh"
   elif "ggZH_nunu" in p: return "ggzh"
-  elif "ttH" in p: return "tth"
-  elif "tHq" in p: return "thq"
-  elif "tHW" in p: return "thw"
-  elif "bbH" in p: return "bbh"
+  elif "tth" in p: return "tth"
+  elif "thq" in p: return "thq"
+  elif "thw" in p: return "thw"
+  elif "bbh" in p: return "bbh"
   else: 
     print(" --> [ERROR] proc s0 not realised for process %s. Leaving"%p)
     exit(0)
