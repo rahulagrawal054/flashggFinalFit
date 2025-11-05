@@ -2,7 +2,7 @@
 signalScriptCfg = {
 
   # Setup
-  'inputWSDir':'/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_30Oct2025/workspaces/2023preBPix/ws_signal/', # dir storing flashgg workspaces
+  'inputWSDir':'/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025_Nominal/workspaces/2023preBPix/ws_signal/', # dir storing flashgg workspaces
   'procs':'auto', # if auto: inferred automatically from filenames (requires names to be of from *pythia8_{PROC}.root)
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   #'ext':'earlyAnalysis_freeze_include', # output directory extension

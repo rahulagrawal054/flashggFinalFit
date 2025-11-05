@@ -4,7 +4,6 @@ source ../setup.sh
 BASE_WS_DIR=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces
 
 # wipe out old outputs and recreate base dir
-rm -rf "${BASE_WS_DIR}"
 mkdir -p "${BASE_WS_DIR}"
 
 # # list of eras to process
@@ -27,7 +26,16 @@ for era in "${eras[@]}"; do
     --outputWSDir "${wsdir}"
 
   python3 trees2ws.py \
-    --inputConfig config_ttH_tH_2022_2023_WithSyst_LHEPDF99.py \
+    --inputConfig config_ttH_tH_2022_2023_WithSyst.py \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/tHW_${era}/output_THWToGG_M125_13TeV_amcatnlo_pythia8.root \
+    --inputMass 125 \
+    --productionMode tHW \
+    --year "${era}" \
+    --doSystematics \
+    --outputWSDir "${wsdir}"
+
+  python3 trees2ws.py \
+    --inputConfig config_ttH_tH_2022_2023_WithSyst.py \
     --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/tHqLep_${era}/output_THQtoGG_lep_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode tHqLep \
@@ -36,7 +44,7 @@ for era in "${eras[@]}"; do
     --outputWSDir "${wsdir}"
 
   python3 trees2ws.py \
-    --inputConfig config_ttH_tH_2022_2023_WithSyst_LHEPDF99.py \
+    --inputConfig config_ttH_tH_2022_2023_WithSyst.py \
     --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/tHqHad_${era}/output_THQtoGG_had_M125_13TeV_amcatnlo_pythia8.root \
     --inputMass 125 \
     --productionMode tHqHad \
@@ -74,7 +82,7 @@ for era in "${eras[@]}"; do
     --outputWSDir "${wsdir}"
 
   python3 trees2ws.py \
-    --inputConfig config_ttH_tH_2022_2023_WithSyst_LHEPDF99.py \
+    --inputConfig config_ttH_tH_2022_2023_WithSyst.py \
     --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/bbH_${era}/output_BBHToGG_M125_13TeV_powheg_pythia8.root \
     --inputMass 125 \
     --productionMode bbh \

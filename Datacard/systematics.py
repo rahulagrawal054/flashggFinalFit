@@ -20,21 +20,20 @@ theory_systematics = [
     {'name': 'pdf_Higgs_ggH', 'title': 'pdf_Higgs_ggH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_ggh.json'},
     {'name': 'pdf_Higgs_qqH', 'title': 'pdf_Higgs_qqH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_qqh.json'},
     {'name': 'pdf_Higgs_VH', 'title': 'pdf_Higgs_VH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_vh.json'},
-    {'name': 'pdf_Higgs_ggZH', 'title': 'pdf_Higgs_ggZH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_ggzh.json'},
     {'name': 'pdf_Higgs_ttH', 'title': 'pdf_Higgs_ttH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_tth.json'},
     {'name': 'pdf_Higgs_tHq', 'title': 'pdf_Higgs_tHq', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thq.json'},
     {'name': 'pdf_Higgs_tHW', 'title': 'pdf_Higgs_tHW', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thw.json'},
 
     # Shape (scale weight) uncertainties
-    {'name': 'weight_LHEScal_0', 'title': 'CMS_hgg_scaleWeight_0', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_LHEScal_1', 'title': 'CMS_hgg_scaleWeight_1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_LHEScal_2', 'title': 'CMS_hgg_scaleWeight_2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
-    {'name': 'weight_LHEScal_3', 'title': 'CMS_hgg_scaleWeight_3', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_LHEScal_4', 'title': 'CMS_hgg_scaleWeight_4', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Nominal
-    {'name': 'weight_LHEScal_5', 'title': 'CMS_hgg_scaleWeight_5', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_LHEScal_6', 'title': 'CMS_hgg_scaleWeight_6', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
-    {'name': 'weight_LHEScal_7', 'title': 'CMS_hgg_scaleWeight_7', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_LHEScal_8', 'title': 'CMS_hgg_scaleWeight_8', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_0', 'title': 'CMS_hgg_scaleWeight_0', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_1', 'title': 'CMS_hgg_scaleWeight_1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_2', 'title': 'CMS_hgg_scaleWeight_2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
+    #{'name': 'weight_LHEScal_3', 'title': 'CMS_hgg_scaleWeight_3', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_4', 'title': 'CMS_hgg_scaleWeight_4', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Nominal
+    #{'name': 'weight_LHEScal_5', 'title': 'CMS_hgg_scaleWeight_5', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_6', 'title': 'CMS_hgg_scaleWeight_6', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
+    #{'name': 'weight_LHEScal_7', 'title': 'CMS_hgg_scaleWeight_7', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+    #{'name': 'weight_LHEScal_8', 'title': 'CMS_hgg_scaleWeight_8', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
 
     {'name': 'weight_AlphaS', 'title': 'CMS_hgg_AlphaS', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
     {'name': 'weight_PS_ISR', 'title': 'CMS_hgg_PS_ISR', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
@@ -96,15 +95,15 @@ experimental_systematics = [
     {'name': 'weight_atLeast1LeptonIdSF_mu_NUM_MediumID_DEN_TrackerMuons', 'title': 'CMS_hgg_LeptonSF_muMediumID', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
     {'name': 'weight_atLeast1LeptonIdSF_mu_NUM_TightPFIso_DEN_MediumID', 'title': 'CMS_hgg_LeptonSF_muTightIso', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
 
-    {'name': 'weight_bTagSF_sys_cferr1', 'title': 'CMS_hgg_bTag_cferr1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_cferr2', 'title': 'CMS_hgg_bTag_cferr2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_hf', 'title': 'CMS_hgg_bTag_hf', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_hfstats1', 'title': 'CMS_hgg_bTag_hfstats1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_hfstats2', 'title': 'CMS_hgg_bTag_hfstats2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_jes', 'title': 'CMS_hgg_bTag_jes', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_lf', 'title': 'CMS_hgg_bTag_lf', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_lfstats1', 'title': 'CMS_hgg_bTag_lfstats1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
-    {'name': 'weight_bTagSF_sys_lfstats2', 'title': 'CMS_hgg_bTag_lfstats2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_cferr1', 'title': 'CMS_hgg_bTag_cferr1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_cferr2', 'title': 'CMS_hgg_bTag_cferr2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_hfstats1', 'title': 'CMS_hgg_bTag_hfstats1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_hfstats2', 'title': 'CMS_hgg_bTag_hfstats2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_lfstats1', 'title': 'CMS_hgg_bTag_lfstats1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_lfstats2', 'title': 'CMS_hgg_bTag_lfstats2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_hf', 'title': 'CMS_hgg_bTag_hf', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_lf', 'title': 'CMS_hgg_bTag_lf', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
+    #{'name': 'weight_bTagSF_sys_jes', 'title': 'CMS_hgg_bTag_jes', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
 
     {'name': 'ElectronScale', 'title': 'CMS_hgg_eleScale', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1},
     {'name': 'ElectronSmearing', 'title': 'CMS_hgg_eleSmear', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1},
