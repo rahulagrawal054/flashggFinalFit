@@ -23,6 +23,7 @@ theory_systematics = [
     {'name': 'pdf_Higgs_ttH', 'title': 'pdf_Higgs_ttH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_tth.json'},
     {'name': 'pdf_Higgs_tHq', 'title': 'pdf_Higgs_tHq', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thq.json'},
     {'name': 'pdf_Higgs_tHW', 'title': 'pdf_Higgs_tHW', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thw.json'},
+    {'name': 'pdf_Higgs_bbH', 'title': 'pdf_Higgs_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'},
 
     # Shape (scale weight) uncertainties
     #{'name': 'weight_LHEScal_0', 'title': 'CMS_hgg_scaleWeight_0', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
@@ -34,6 +35,10 @@ theory_systematics = [
     #{'name': 'weight_LHEScal_6', 'title': 'CMS_hgg_scaleWeight_6', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
     #{'name': 'weight_LHEScal_7', 'title': 'CMS_hgg_scaleWeight_7', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
     #{'name': 'weight_LHEScal_8', 'title': 'CMS_hgg_scaleWeight_8', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
+
+     {'name':'weight_Higgs_plus_b_syst','title':'CMS_hgg_Higgs_plus_b_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+     {'name':'weight_Higgs_plus_c_syst','title':'CMS_hgg_Higgs_plus_c_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+
 
     {'name': 'weight_AlphaS', 'title': 'CMS_hgg_AlphaS', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
     {'name': 'weight_PS_ISR', 'title': 'CMS_hgg_PS_ISR', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
