@@ -1,7 +1,7 @@
 {
   "r_2D":{
     "pois":"r_tHq,r_ttH",
-    "fits":"profile2D:statonly_fixedMH:all",
+    "fits":"profile2D:WithSyst_fixedMH:all",
     "points":"5000:50",
     "fit_opts":"--freezeParameters MH --setParameterRanges r_tHq=-5.0,20.0,r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
   },
@@ -13,7 +13,7 @@
   },
   "r_tHq_1D_ttH_profiled": {
     "pois": "r_tHq",
-    "fits": "profile1D:statonly_fixedMH:all",
+    "fits": "profile1D:WithSyst_fixedMH:all",
     "points": "1000:50",
     "fit_opts": "--freezeParameters MH, --setParameterRanges r_tHq=-25.0,25.0,r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
   },
@@ -21,41 +21,41 @@
     "pois": "r_ttH",
     "fits": "profile1D:WithSyst_fixedMH:all",
     "points": "1000:50",
-    "fit_opts": "--freezeParameters MH --setParameterRanges r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_ttH=-0.5,3 --saveSpecifiedNuis all"
   },
   "r_ttH_1D_tHq_profiled": {
     "pois": "r_ttH",
-    "fits": "profile1D:statonly_fixedMH:all",
+    "fits": "profile1D:WithSyst_fixedMH:all",
     "points": "1000:50",
-    "fit_opts": "--setParameterRanges r_tHq=-5.0,20.0,r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
+    "fit_opts": "--freezeParameters MH, --setParameterRanges r_tHq=-5.0,20.0,r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
   },
   "Z_ttH": {
     "pois": "r_ttH",
-    "fits": "Significance:statonly_fixedMH:all",
+    "fits": "Significance:WithSyst_fixedMH:all",
     "points": "1", 
     "fit_opts": "--setParameterRanges r_ttH=-0.5,2.5 --setPhysicsModelParameters r_tHq=1 --freezeParameters r_tHq,MH"
   },
   "limit_tHq": {
       "pois": "r_tHq",
-      "fits": "AsymptoticLimit:statonly_fixedMH:all",
+      "fits": "AsymptoticLimit:WithSyst_fixedMH:all",
       "points": "1",
       "fit_opts": "--setParameterRanges r_tHq=0,25 --setPhysicsModelParameters r_ttH=1, --freezeParameters MH,r_ttH"
     },
     "limit_tHq_HybridNew": {
       "pois":     "r_tHq",
-      "fits":     "HybridNew:statonly_fixedMH:all",
+      "fits":     "HybridNew:WithSyst_fixedMH:all",
       "points":   "1",
       "fit_opts": "--setParameterRanges r_tHq=0,25 --setParameters MH=125.38 --freezeParameters MH --testStat=ProfileLikelihood --saveHybridResult --singlePoint 1"
     },
   "r_tHq_plus_tHW_1D": {
     "pois": "r_tH",
-    "fits": "profile1D:statonly_fixedMH:all",
+    "fits": "profile1D:WithSyst_fixedMH:all",
     "points": "1000:50",
     "fit_opts": "--freezeParameters MH,r_ttH, --setParameterRanges r_tH=-25.0,25.0 --saveSpecifiedNuis all"
   },
   "r_tHq_plus_tHW_1D_ttH_profiled": {
     "pois": "r_tH",
-    "fits": "profile1D:statonly_fixedMH:all",
+    "fits": "profile1D:WithSyst_fixedMH:all",
     "points": "1000:50",
     "fit_opts": "--freezeParameters MH, --setParameterRanges r_tH=-25.0,25.0,r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
   }

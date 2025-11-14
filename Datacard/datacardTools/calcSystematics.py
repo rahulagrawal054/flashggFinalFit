@@ -8,20 +8,48 @@ from commonObjects import *
 
 # For constant systematics:
 def addConstantSyst(sd,_syst,options):
+  print(f"\n[addConstantSyst] >>> Starting systematic: {_syst['name']}")
+  print(f"  --> correlateAcrossYears = {_syst['correlateAcrossYears']}")
+  print(f"  --> value = {_syst['value']}")
+  print(f"  --> type = {_syst['type']}")
 
   # Read json file into dict and set flag
   fromJson = False
   if "json" in _syst['value']:
     fromJson = True
+    print(f"  --> Detected JSON input: {_syst['value']}")
     with open( _syst['value'], "r" ) as jsonfile: uval = json.load(jsonfile)
+    try:
+        with open(_syst['value'], "r") as jsonfile:
+            uval = json.load(jsonfile)
+            print(f"  --> Successfully loaded JSON file with keys: {list(uval.keys())}")
+    except Exception as e:
+        print(f"  [ERROR] Could not load JSON file {_syst['value']} : {e}")
+        return sd
 
   # Add column to dataFrame with default value
   if _syst['correlateAcrossYears'] == 1: 
+    print("  --> Treating as fully correlated across years")
     sd[_syst['name']] = '-'
     if fromJson:
+      print(f"  --> Filling values from JSON for signal rows using getValueFromJson()")
+
+      # Debug: preview what will be fetched before filling
+      sample_rows = sd[(sd['type'] == 'sig')].head(5)
+      for i, x in sample_rows.iterrows():
+          try:
+              val = getValueFromJson(x, uval, _syst['name'])
+              proc = x['proc'] if 'proc' in x else x.get('process', 'N/A')
+              print(f"     [DEBUG preview] Process={proc} → value={val}")
+          except Exception as e:
+              print(f"     [DEBUG ERROR] Could not get value for row {i}: {e}")
+
       sd.loc[(sd['type']=='sig'),_syst['name']] = sd[(sd['type']=='sig')].apply(lambda x: getValueFromJson(x,uval,_syst['name']), axis=1)
+      print(f"  --> Filled rows: {len(sd.loc[(sd['type'] == 'sig')])}")
+      print(f"  --> Example of filled values:\n{sd.loc[(sd['type'] == 'sig'), _syst['name']].head()}")
     else:
       # If signal and not NOTAG then set value
+      print(f"  --> Filling constant value {_syst['value']} for all signal rows (excluding NOTAG)")
       sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
 
   # Partial correlation
@@ -41,16 +69,27 @@ def addConstantSyst(sd,_syst,options):
   return sd
 
 def getValueFromJson(row,uncertainties,sname):
+  print("\n[getValueFromJson] -----------------------------")
   # uncertainties is a dict of the form proc:{sname:X}
+  print(f"  Input process: {row['proc']}")
+  print(f"  Requested systematic: {sname}")
   p = re.sub("_2016_%s"%decayMode,"",row['proc'])
   p = re.sub("_2017_%s"%decayMode,"",p)
   p = re.sub("_2018_%s"%decayMode,"",p)
   p = re.sub("_2022preEE_%s"%decayMode,"",p)
   p = re.sub("_2022postEE_%s"%decayMode,"",p)
-  if p in uncertainties: 
-    if type(uncertainties[p][sname])==list: return uncertainties[p][sname]
-    else: return [uncertainties[p][sname]]
-  else: return '-'
+  print(f"  After cleanup → '{p}'")
+  if p in uncertainties:
+    print(f"  Found process '{p}' in JSON keys")
+    if type(uncertainties[p][sname])==list:
+      print(f"  Value (list) = {uncertainties[p][sname]}")
+      return uncertainties[p][sname]
+    else:
+      print(f"  Value (single) = {uncertainties[p][sname]}")
+      return [uncertainties[p][sname]]
+  else:
+      print(f"  [WARNING] Process '{p}' not found in JSON keys: {list(uncertainties.keys())[:5]}...")
+      return '-'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to return type of systematic: to be used by factory functions

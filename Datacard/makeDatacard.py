@@ -1,7 +1,7 @@
 # Datacard making script: uses output pkl file of makeYields.py script
 
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
-import os, sys
+import os, sys, json
 import re
 from optparse import OptionParser
 import ROOT

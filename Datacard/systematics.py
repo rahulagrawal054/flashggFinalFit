@@ -7,42 +7,15 @@
 # ---------------------------------------------------------------------
 
 theory_systematics = [
-    # Normalisation uncertainties
-    {'name': 'BR_hgg', 'title': 'BR_hgg', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': "0.98/1.021"},
     {'name': 'QCDscale_ggH', 'title': 'QCDscale_ggH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_ggh.json'},
     {'name': 'QCDscale_qqH', 'title': 'QCDscale_qqH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_qqh.json'},
     {'name': 'QCDscale_VH', 'title': 'QCDscale_VH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_vh.json'},
     {'name': 'QCDscale_ttH', 'title': 'QCDscale_ttH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_tth.json'},
     {'name': 'QCDscale_tHq', 'title': 'QCDscale_tHq', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thq.json'},
     {'name': 'QCDscale_tHW', 'title': 'QCDscale_tHW', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thw.json'},
-    {'name': 'QCDscale_bbH', 'title': 'QCDscale_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'},
+    {'name': 'QCDscale_bbH', 'title': 'QCDscale_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'}
 
-    {'name': 'pdf_Higgs_ggH', 'title': 'pdf_Higgs_ggH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_ggh.json'},
-    {'name': 'pdf_Higgs_qqH', 'title': 'pdf_Higgs_qqH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_qqh.json'},
-    {'name': 'pdf_Higgs_VH', 'title': 'pdf_Higgs_VH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_vh.json'},
-    {'name': 'pdf_Higgs_ttH', 'title': 'pdf_Higgs_ttH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_tth.json'},
-    {'name': 'pdf_Higgs_tHq', 'title': 'pdf_Higgs_tHq', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thq.json'},
-    {'name': 'pdf_Higgs_tHW', 'title': 'pdf_Higgs_tHW', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thw.json'},
-    {'name': 'pdf_Higgs_bbH', 'title': 'pdf_Higgs_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'},
-
-    # Shape (scale weight) uncertainties
-    #{'name': 'weight_LHEScal_0', 'title': 'CMS_hgg_scaleWeight_0', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    #{'name': 'weight_LHEScal_1', 'title': 'CMS_hgg_scaleWeight_1', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    #{'name': 'weight_LHEScal_2', 'title': 'CMS_hgg_scaleWeight_2', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
-    #{'name': 'weight_LHEScal_3', 'title': 'CMS_hgg_scaleWeight_3', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    #{'name': 'weight_LHEScal_4', 'title': 'CMS_hgg_scaleWeight_4', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Nominal
-    #{'name': 'weight_LHEScal_5', 'title': 'CMS_hgg_scaleWeight_5', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    #{'name': 'weight_LHEScal_6', 'title': 'CMS_hgg_scaleWeight_6', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},  # Unphysical
-    #{'name': 'weight_LHEScal_7', 'title': 'CMS_hgg_scaleWeight_7', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    #{'name': 'weight_LHEScal_8', 'title': 'CMS_hgg_scaleWeight_8', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-
-     {'name':'weight_Higgs_plus_b_syst','title':'CMS_hgg_Higgs_plus_b_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-     {'name':'weight_Higgs_plus_c_syst','title':'CMS_hgg_Higgs_plus_c_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-
-
-    {'name': 'weight_AlphaS', 'title': 'CMS_hgg_AlphaS', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_PS_ISR', 'title': 'CMS_hgg_PS_ISR', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']},
-    {'name': 'weight_PS_FSR', 'title': 'CMS_hgg_PS_FSR', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 1, 'tiers': ['shape']}
+    
 ]
 
 # ---------------------------------------------------------------------
@@ -50,6 +23,7 @@ theory_systematics = [
 # ---------------------------------------------------------------------
 
 experimental_systematics = [
+<<<<<<< HEAD
 
                 # Updated luminosity partial-correlation scheme: 13/5/21 (recommended simplified nuisances)
                 #{'name':'lumi_13TeV_Uncorrelated','title':'lumi_13TeV_Uncorrelated','type':'constant','prior':'lnN','correlateAcrossYears':0,'value':{'2016':'1.010','2017':'1.020','2018':'1.015'}},
@@ -118,6 +92,10 @@ experimental_systematics = [
     {'name': 'JecSystTotal', 'title': 'CMS_scale_j', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
     {'name': 'JerSyst', 'title': 'CMS_res_j', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0},
     {'name': 'MET', 'title': 'CMS_hgg_MET_Unclustered', 'type': 'factory', 'prior': 'lnN', 'correlateAcrossYears': 0}
+    # {'name':'weight_LHEPdf','title':'CMS_hgg_LHEPdf','type':'factory','prior':'lnN','correlateAcrossYears':1},
+
+=======
+>>>>>>> d433fcf (commentout the weight_LHEPdf)
 ]
 
 # ---------------------------------------------------------------------
@@ -125,10 +103,10 @@ experimental_systematics = [
 # ---------------------------------------------------------------------
 
 signal_shape_systematics = [
-    {'name': 'ScaleEB', 'title': 'ScaleEB', 'type': 'signal_shape', 'mode': 'scales', 'mean': '0.0', 'sigma': '1.0'},
-    {'name': 'ScaleEE', 'title': 'ScaleEE', 'type': 'signal_shape', 'mode': 'scales', 'mean': '0.0', 'sigma': '1.0'},
-    {'name': 'Smearing', 'title': 'Smearing', 'type': 'signal_shape', 'mode': 'smears', 'mean': '0.0', 'sigma': '1.0'},
-    {'name': 'Material', 'title': 'Material', 'type': 'signal_shape', 'mode': 'scalesCorr', 'mean': '0.0', 'sigma': '1.0'},
-    {'name': 'FNUF', 'title': 'FNUF', 'type': 'signal_shape', 'mode': 'scalesCorr', 'mean': '0.0', 'sigma': '1.0'}
+    #{'name': 'ScaleEB', 'title': 'ScaleEB', 'type': 'signal_shape', 'mode': 'scales', 'mean': '0.0', 'sigma': '1.0'},
+    #{'name': 'ScaleEE', 'title': 'ScaleEE', 'type': 'signal_shape', 'mode': 'scales', 'mean': '0.0', 'sigma': '1.0'},
+    #{'name': 'Smearing', 'title': 'Smearing', 'type': 'signal_shape', 'mode': 'smears', 'mean': '0.0', 'sigma': '1.0'},
+    #{'name': 'Material', 'title': 'Material', 'type': 'signal_shape', 'mode': 'scalesCorr', 'mean': '0.0', 'sigma': '1.0'},
+    #{'name': 'FNUF', 'title': 'FNUF', 'type': 'signal_shape', 'mode': 'scalesCorr', 'mean': '0.0', 'sigma': '1.0'}
 ]
 

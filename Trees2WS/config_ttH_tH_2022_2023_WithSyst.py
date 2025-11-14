@@ -11,7 +11,7 @@ trees2wsCfg = {
   'diffVar':'',
   'notagVars':[], # Vars to add to NOTAG RooDataset
   'systematicsVars':["CMS_hgg_mass","weight"], # Variables to add to sytematic RooDataHists
-  'theoryWeightContainers':{'weight_LHEScale':9, 'weight_LHEPdf' : 101 },
+ #'theoryWeightContainers':{'weight_LHEScale':9, 'weight_LHEPdf' : 101 },
   'theoryWeightContainers':{'weight_LHEScale':9},
 
   # List of systematics: use string YEAR for year-dependent systematics
