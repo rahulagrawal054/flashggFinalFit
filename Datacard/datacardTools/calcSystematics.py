@@ -78,6 +78,8 @@ def getValueFromJson(row,uncertainties,sname):
   p = re.sub("_2018_%s"%decayMode,"",p)
   p = re.sub("_2022preEE_%s"%decayMode,"",p)
   p = re.sub("_2022postEE_%s"%decayMode,"",p)
+  p = re.sub("_2023preBPix_%s"%decayMode,"",p)
+  p = re.sub("_2023postBPix_%s"%decayMode,"",p)
   print(f"  After cleanup → '{p}'")
   if p in uncertainties:
     print(f"  Found process '{p}' in JSON keys")
