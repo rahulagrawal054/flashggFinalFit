@@ -51,8 +51,12 @@ for proc in allProcs.split(","):
   # Loop over cats: up
   for cat in allCats.split(","):
     # Extract sum of weights
-    nominalDataName = "%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.MH,sqrts__,cat)
+    nominalDataName = "%s_incl_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.MH,sqrts__,cat)
     nominalData = inputWS.data(nominalDataName)
+    print(f"DEBUG: Looking for dataset '{nominalDataName}' in workspace '{_WSFileName}'")
+    print("DEBUG: Available datasets in workspace:")
+    for d in inputWS.allData():
+        print("  ", d.GetName())
     sumw = nominalData.sumEntries()
     # Update dict if largest
     if sumw > dsumw[cat]:
