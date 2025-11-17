@@ -27,7 +27,7 @@ for era in "${eras[@]}"; do
 
   python3 trees2ws.py \
     --inputConfig config_ttH_tH_2022_2023_WithSyst.py \
-    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/tHW_${era}/output_THWToGG_M125_13TeV_amcatnlo_pythia8.root \
+    --inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/tHW_${era}/output_THWtoGG_M125_13TeV_madgraph_pythia8.root \
     --inputMass 125 \
     --productionMode tHW \
     --year "${era}" \
@@ -99,11 +99,11 @@ done
 mkdir -p /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/Data
 # 3) data (same file each time, but we generate a per‐era workspace)
 # the "older" data contains almost the full corrections, ok for now
-#python3 trees2ws_data.py \
-#--inputConfig config_ttH_tH_2022_2023_WithSyst.py \
-#--inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/Data/allData.root \
-#--outputWSDir /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/Data \
-#--applyMassCut \
-#--massCutRange 100,180
+python3 trees2ws_data.py \
+--inputConfig config_ttH_tH_2022_2023_WithSyst.py \
+--inputTreeFile /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/root/Data/allData.root \
+--outputWSDir /eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/Data \
+--applyMassCut \
+--massCutRange 100,180
 
 echo ">>> All done!"
