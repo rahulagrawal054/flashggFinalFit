@@ -4,6 +4,11 @@
         "pdf_Higgs_tHq":1.035,
         "alphaS_tHq":1.012
     },
+    "tHq_incl":{
+        "QCDscale_tHq":[1.065,0.851],
+        "pdf_Higgs_tHq":1.035,
+        "alphaS_tHq":1.012
+    },
     "tHq":{
         "QCDscale_tHq":[1.065,0.851],
         "pdf_Higgs_tHq":1.035,
