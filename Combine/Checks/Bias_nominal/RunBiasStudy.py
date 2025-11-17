@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-
+import os
+from os import system, path
 from biasUtils import *
-
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d","--datacard",default="Datacard.root")
@@ -15,7 +15,7 @@ parser.add_option("-m","--mH",default=125.,type="float")
 parser.add_option("-c","--combineOptions",default="")
 parser.add_option("-s","--seed",default=-1,type="int")
 parser.add_option("--dryRun",action="store_true", default=False)
-parser.add_option("--poi",default="r")
+parser.add_option("--poi",default="r_ttH")
 parser.add_option("--split",default=500,type="int")
 parser.add_option("--selectFunction",default=None)
 parser.add_option("--gaussianFit",action="store_true", default=False)
@@ -56,17 +56,17 @@ for ipdf in range(multipdf.getNumPdfs()):
     indexNameMap[ipdf] = multipdf.getPdf(ipdf).GetName()
 
 if opts.toys:
-    if not path.isdir('BiasToysn'): system('mkdir -p BiasToys')
-    toyCmdBase = 'combine -m %.4f -d %s -M GenerateOnly --expectSignal %.4f -s %g --saveToys %s '%(opts.mH, opts.datacard, opts.expectSignal, opts.seed, opts.combineOptions)
+    if not path.isdir('BiasToysn'): os.system('mkdir -p BiasToys')
+    toyCmdBase = 'combine -m %.4f -d %s -M GenerateOnly --expectSignal %.4f -s %g --saveToys %s --toysNoSystematics'%(opts.mH, opts.datacard, opts.expectSignal, opts.seed, opts.combineOptions)
     for ipdf,pdfName in indexNameMap.items():
         name = shortName(pdfName)
         if opts.nToys > opts.split:
             for isplit in range(opts.nToys//opts.split):
-                toyCmd = toyCmdBase + ' -t %g -n _%s_split%g --setParameters %s=%g --freezeParameters %s'%(opts.split, name, isplit, indexName, ipdf, indexName)
+                toyCmd = toyCmdBase + ' -t %g -n _%s_split%g --setParameters %s=%g --freezeParameters %s '%(opts.split, name, isplit, indexName, ipdf, indexName)
                 run(toyCmd, dry=opts.dryRun)
                 system('mv higgsCombine_%s* %s'%(name, toyName(name,split=isplit)))
         else: 
-            toyCmd = toyCmdBase + ' -t %g -n _%s --setParameters %s=%g --freezeParameters %s'%(opts.nToys, name, indexName, ipdf, indexName)
+            toyCmd = toyCmdBase + ' -t %g -n _%s --setParameters %s=%g --freezeParameters %s --toysNoSystematics'%(opts.nToys, name, indexName, ipdf, indexName)
             run(toyCmd, dry=opts.dryRun)
             system('mv higgsCombine_%s* %s'%(name, toyName(name)))
 print()
@@ -101,17 +101,17 @@ if opts.plots:
             if not getattr(tree,'quantileExpected')==-1: 
                 raiseFailError(itoy,True) 
                 continue
-            bf = getattr(tree, 'r')
+            bf = getattr(tree, 'r_ttH')
             tree.GetEntry(3*itoy+1)
             if not abs(getattr(tree,'quantileExpected')--0.32)<0.001: 
                 raiseFailError(itoy,True) 
                 continue
-            lo = getattr(tree, 'r')
+            lo = getattr(tree, 'r_ttH')
             tree.GetEntry(3*itoy+2)
             if not abs(getattr(tree,'quantileExpected')-0.32)<0.001: 
                 raiseFailError(itoy,True) 
                 continue
-            hi = getattr(tree, 'r')
+            hi = getattr(tree, 'r_ttH')
             diff = bf - opts.expectSignal
             unc = 0.5 * (hi-lo)
             if unc > 0.: 
