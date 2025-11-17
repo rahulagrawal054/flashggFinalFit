@@ -3,7 +3,7 @@
 # Run yields
 python3 RunYields.py \
   --inputWSDirMap \
-  2022preEE=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/2022preEE/ws_signal,\
+2022preEE=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/2022preEE/ws_signal,\
 2022postEE=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/2022postEE/ws_signal,\
 2023preBPix=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/2023preBPix/ws_signal,\
 2023postBPix=/eos/user/r/rkumarag/hgg_tth_th_cp_analysis/finalFitPreparation/outputForFinalFits_03Nov2025/workspaces/2023postBPix/ws_signal \
@@ -12,6 +12,7 @@ python3 RunYields.py \
   --ext tth_th_analysis \
   --mergeYears \
   --skipCOWCorr \
+  --skipZeroes \
   --batch local
 
 # Make datacard
