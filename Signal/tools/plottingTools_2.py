@@ -143,7 +143,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
-  # canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s.pdf"%(_outdir,_cat,_proc,_extension))
 
 # Plot reduced chi2 vs nGauss
@@ -195,7 +195,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
-  # canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
+  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.pdf"%(_outdir,_cat,_proc,_extension))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -614,6 +614,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     es['combined'] = effSigma
     for year in _opt.years.split(","): es[year] = getEffSigma(_hists['pdf_%s'%year])
     with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
+  
 
   # Save canvas
   canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))
