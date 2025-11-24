@@ -188,13 +188,17 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
       # Adapting to HiggsDNA output conventions, we have just "Up", 01sigma is missing
       if( "%sUp"%s not in _nominalDataContents )|( "%sDown"%s not in _nominalDataContents ):
         systToSkip.append(s)
-        print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
-        if not ignoreWarnings: sys.exit(1) 
+        #print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
+        print(" --> [INFO] Skipping systematic (%s) for (%s,%s) because weights are not present." % (s, proc, year))
+        continue
+        #if not ignoreWarnings: sys.exit(1) 
       else:
         if s not in _nominalDataContents:
           systToSkip.append(s)
-          print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
-          if not ignoreWarnings: sys.exit(1)
+          #print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
+          print(" --> [INFO] Skipping systematic (%s) for (%s,%s) because nominal weight is missing." % (s, proc, year))
+          continue
+          #if not ignoreWarnings: sys.exit(1)
  
   if data_nominal.numEntries() < 100:
     print(" [WARNING] Less than 100 events in considered bin. Those variations will be excluded.")
