@@ -7,6 +7,7 @@
 # ---------------------------------------------------------------------
 
 theory_systematics = [
+
     # Normalisation uncertainties: enter interpretations
     {'name':'BR_hgg','title':'BR_hgg','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':"0.98/1.021"},
 
@@ -16,7 +17,7 @@ theory_systematics = [
     {'name': 'QCDscale_ttH', 'title': 'QCDscale_ttH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_tth.json'},
     #{'name': 'QCDscale_tHq', 'title': 'QCDscale_tHq', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thq.json'},
     {'name': 'QCDscale_tHW', 'title': 'QCDscale_tHW', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_thw.json'},
-    {'name': 'QCDscale_bbH', 'title': 'QCDscale_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'},
+    #{'name': 'QCDscale_bbH', 'title': 'QCDscale_bbH', 'type': 'constant', 'prior': 'lnN', 'correlateAcrossYears': 1, 'value': 'theory_uncertainties/thu_bbh.json'},
 
     {'name':'pdf_Higgs_ggH','title':'pdf_Higgs_ggH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_ggh.json'},
     {'name':'pdf_Higgs_qqH','title':'pdf_Higgs_qqH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh.json'},
@@ -24,7 +25,7 @@ theory_systematics = [
     {'name':'pdf_Higgs_ttH','title':'pdf_Higgs_ttH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_tth.json'},
     #{'name':'pdf_Higgs_tHq','title':'pdf_Higgs_tHq','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_thq.json'},
     {'name':'pdf_Higgs_tHW','title':'pdf_Higgs_tHW','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_thw.json'},
-    #{'name':'pdf_Higgs_bbH','title':'pdf_Higgs_bbH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_bbh.json'},
+    {#'name':'pdf_Higgs_bbH','title':'pdf_Higgs_bbH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_bbh.json'},
     
     {'name':'alphaS_ggH','title':'alphaS_ggH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_ggh.json'},
     {'name':'alphaS_qqH','title':'alphaS_qqH','type':'constant','prior':'lnN','correlateAcrossYears':1,'value':'theory_uncertainties/thu_qqh.json'},
@@ -41,19 +42,22 @@ theory_systematics = [
      {'name':'weight_PS_FSR','title':'CMS_hgg_PS_FSR','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
 
     # --- NEW: Higgs b/c Systematics (Correlated) ---
-    # {'name':'weight_Higgs_plus_b_syst','title':'CMS_hgg_Higgs_b_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-    # {'name':'weight_Higgs_plus_c_syst','title':'CMS_hgg_Higgs_c_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+     {'name':'weight_Higgs_plus_b_syst','title':'CMS_hgg_Higgs_b_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
+     {'name':'weight_Higgs_plus_c_syst','title':'CMS_hgg_Higgs_c_syst','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
     
     # The scheme below is valid for v13, you need to explicitly check the nanoAOD documentation to validate your setup
      {'name':'weight_LHEScal_0','title':'CMS_hgg_scaleWeight_0','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
      {'name':'weight_LHEScal_1','title':'CMS_hgg_scaleWeight_1','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-    #{'name':'weight_LHEScal_2','title':'CMS_hgg_scaleWeight_2','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #Unphysical
+     {'name':'weight_LHEScal_2','title':'CMS_hgg_scaleWeight_2','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #Unphysical
      {'name':'weight_LHEScal_3','title':'CMS_hgg_scaleWeight_3','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-    #{'name':'weight_LHEScal_4','title':'CMS_hgg_scaleWeight_4','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #nominal weight
+     {'name':'weight_LHEScal_4','title':'CMS_hgg_scaleWeight_4','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #nominal weight
      {'name':'weight_LHEScal_5','title':'CMS_hgg_scaleWeight_5','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
-    #{'name':'weight_LHEScal_6','title':'CMS_hgg_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #Unphysical
+     {'name':'weight_LHEScal_6','title':'CMS_hgg_scaleWeight_6','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}, #Unphysical
      {'name':'weight_LHEScal_7','title':'CMS_hgg_scaleWeight_7','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']},
      {'name':'weight_LHEScal_8','title':'CMS_hgg_scaleWeight_8','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']}
+
+    # for i in range(1,101): theory_systematics.append({'name':f'weight_LHEPdf_{i}','title':f'CMS_hgg_pdfWeight_{i}','type':'factory','prior':'lnN','correlateAcrossYears':1,'tiers':['shape']})
+
 
      # Add this loop *after* your theory_systematics list is defined
 # (Or just add the entries to the list directly)
@@ -94,7 +98,7 @@ experimental_systematics = [
    {'name':'weight_atLeast1LeptonIdSF_mu_NUM_MediumID_DEN_TrackerMuons','title':'CMS_hgg_mu_MediumID','type':'factory','prior':'lnN','correlateAcrossYears':0},
    {'name':'weight_atLeast1LeptonIdSF_mu_NUM_TightPFIso_DEN_MediumID','title':'CMS_hgg_mu_TightPFIso','type':'factory','prior':'lnN','correlateAcrossYears':0},
 
-   # b-Tagging Scale Factors
+  # # b-Tagging Scale Factors
    {'name':'weight_bTagSF_sys_cferr1','title':'CMS_hgg_bTag_cferr1','type':'factory','prior':'lnN','correlateAcrossYears':0},
    {'name':'weight_bTagSF_sys_cferr2','title':'CMS_hgg_bTag_cferr2','type':'factory','prior':'lnN','correlateAcrossYears':0},
    {'name':'weight_bTagSF_sys_hf','title':'CMS_hgg_bTag_hf','type':'factory','prior':'lnN','correlateAcrossYears':0},
