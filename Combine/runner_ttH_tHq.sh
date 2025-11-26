@@ -32,8 +32,8 @@ for i in {0..19}; do
     ./runFits_r_tHq_1D/condor_profile1D_WithSyst_fixedMH_r_tHq.sh $i
     ./runFits_r_tHq_1D/condor_profile1D_statonly_fixedMH_r_tHq.sh $i
     
-    ./runFits_r_ttH_1D_tHq_profiled/condor_profile1D_WithSyst_fixedMH_r_tHq.sh $i
-    ./runFits_r_ttH_1D_tHq_profiled/condor_profile1D_statonly_fixedMH_r_tHq.sh $i
+    ./runFits_r_ttH_1D_tHq_profiled/condor_profile1D_WithSyst_fixedMH_r_ttH.sh $i
+    ./runFits_r_ttH_1D_tHq_profiled/condor_profile1D_statonly_fixedMH_r_ttH.sh $i
     
     ./runFits_r_tHq_1D_ttH_profiled/condor_profile1D_WithSyst_fixedMH_r_tHq.sh $i
     ./runFits_r_tHq_1D_ttH_profiled/condor_profile1D_statonly_fixedMH_r_tHq.sh $i
