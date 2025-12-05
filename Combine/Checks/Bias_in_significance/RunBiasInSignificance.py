@@ -20,6 +20,7 @@ def get_options():
     parser.add_option('--initial-fit-param', dest='initial_fit_param', default='lumi_13p6TeV_2022', help="Initial fit parameter (combine must have an input parameter to fit to, pick any low impact nuisance)")
     parser.add_option('--nToys', dest='nToys', default=20000, type='int', help="Number of toys")
     parser.add_option('--mode', dest='mode', default="setup", help="[setup,generate,fixed,envelope]")
+    parser.add_option('--StatOnly', action='store_true', dest='StatOnly', default=False,help='Run StatOnly initial fit')
     return parser.parse_args()
 (opt,args) = get_options()
 
@@ -35,7 +36,10 @@ if opt.mode == "setup":
     f.Close()
    
     # Initial fit fixing params to be zero
-    cmd = "combine -m %s -d %s -M MultiDimFit --cminDefaultMinimizerStrategy 0 --setParameters MH=%s,r_ttH=0 --freezeParameters MH,r_ttH -P %s -n _initial --saveWorkspace --saveSpecifiedIndex %s --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2; cd .."%(opt.MH,opt.inputWSFile,opt.MH,opt.initial_fit_param,",".join(pdf_index))
+    if getattr(opt,"StatOnly", False):
+        cmd = "combine -m %s -d %s -M MultiDimFit --cminDefaultMinimizerStrategy 0 --setParameters MH=%s,r_ttH=0 --freezeParameters MH,r_ttH -n _initial --saveWorkspace --saveSpecifiedIndex %s --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2; cd .."%(opt.MH,opt.inputWSFile,opt.MH, ",".join(pdf_index))
+    else:
+        cmd = "combine -m %s -d %s -M MultiDimFit --cminDefaultMinimizerStrategy 0 --setParameters MH=%s,r_ttH=0 --freezeParameters MH,r_ttH -P %s -n _initial --saveWorkspace --saveSpecifiedIndex %s --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2; cd .."%(opt.MH,opt.inputWSFile,opt.MH,opt.initial_fit_param,",".join(pdf_index))
     print(cmd)
     os.system(cmd)
 
@@ -50,8 +54,11 @@ if opt.mode == "setup":
         json.dump(pdf_index_bf, jf)
 
 if opt.mode == "generate":
-
-    cmd = "combine -m %s -d higgsCombine_initial.MultiDimFit.mH%s.root -M GenerateOnly --setParameters MH=%s --freezeParameters MH --expectSignal 0 -n _toy_ --saveToys --snapshotName MultiDimFit -t %s -s -1\n\n"%(opt.MH,opt.MH,opt.MH,opt.nToys)
+    
+    if getattr(opt,"StatOnly", False):
+        cmd = "combine -m %s -d higgsCombine_initial.MultiDimFit.mH%s.root -M GenerateOnly --setParameters MH=%s --freezeParameters MH --expectSignal 0 -n _toy_ --saveToys --snapshotName MultiDimFit -t %s -s -1 --toysNoSystematics\n\n"%(opt.MH,opt.MH,opt.MH,opt.nToys)
+    else:
+        cmd = "combine -m %s -d higgsCombine_initial.MultiDimFit.mH%s.root -M GenerateOnly --setParameters MH=%s --freezeParameters MH --expectSignal 0 -n _toy_ --saveToys --snapshotName MultiDimFit -t %s -s -1\n\n"%(opt.MH,opt.MH,opt.MH,opt.nToys)
     print(cmd)
     os.system(cmd)
 
