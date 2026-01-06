@@ -3,10 +3,48 @@
 # ==============================
 # Step 1: Create workspaces
 # ==============================
+# 2D Scan
+# ==============================
+python3 RunText2Workspace.py --mode r_2D --batch local
+
+# r_ttH (ttH + tHW)
+# ==============================
 python3 RunText2Workspace.py --mode r_ttH_1D --batch local
-python3 RunText2Workspace.py --mode r_tHq_1D --batch local
 python3 RunText2Workspace.py --mode r_ttH_1D_tHq_profiled --batch local
-python3 RunText2Workspace.py --mode r_tHq_1D_ttH_profiled --batch local
+
+# r_tH (tHq+tHW)
+# ==============================
+python3 RunText2Workspace.py --mode r_tHq_plus_tHW_1D --batch local
+python3 RunText2Workspace.py --mode r_tHq_plus_tHW_1D_ttH_profiled  --batch local
+
+# r_tHq (tHqHad + tHqLep)
+# ==============================
+python3 RunText2Workspace.py --mode r_tHq_1D --batch local
+python3 RunText2Workspace.py --mode r_tHq_1D_ttH_profile --batch local
+
+# Z_ttH (ttH+tHW)
+# ==============================
+python3 RunText2Workspace.py --mode Z_ttH --batch local
+
+# Z_tH (tHq+tHW) Significance
+# ==============================
+python3 RunText2Workspace.py --mode Z_tHq_plus_tHW --batch local
+
+# Z_tH (tHq+tHW) Limit
+# ==============================
+python3 RunText2Workspace.py --mode limit_tHq_plus_tHW --batch local
+
+# Z_tHq (tHqHad + tHqLep) Significance
+# ==============================
+python3 RunText2Workspace.py --mode Z_tHq --batch local
+
+# Z_tHq (tHqHad + tHqLep) Limit (AsymptoticLimit)
+# ==============================
+python3 RunText2Workspace.py --mode limit_tHq --batch local
+
+# Z_tHq (tHqHad + tHqLep) Limit (HybridNew)
+# ==============================
+python3 RunText2Workspace.py --mode limit_tHq_HybridNew --batch local
 
 # ==============================
 # Step 2: Dry runs
@@ -119,3 +157,9 @@ cd /eos/user/r/rkumarag/www
 
 # Return to previous directory
 cd -
+
+NEW_DIR="/eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/Plot_$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$NEW_DIR"
+mv runFits_r_t* "$NEW_DIR"
+cp Datacard* "$NEW_DIR"
+mv t2w_jobs/ "$NEW_DIR"
