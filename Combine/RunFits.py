@@ -217,3 +217,21 @@ for fidx in range(len(fits)):
     if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
       fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s.sub; cd .."%(_name), fitcmd)   
     run(fitcmd)
+  # Significanace
+  elif _fit.split(":")[0] == "Significance":
+      for poi in _fitpois:
+          # CHANGED: Removed 'exp_opts' and replaced with '-t -1' to avoid double --expectSignal
+          fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M Significance -m %s %s -t -1 -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .." % (opt.ext, opt.mode, _name, poi, opt.mass, d_opts, _name, poi, poi, _fit_opts, pdf_opts, common_opts, job_opts)
+          if (os.environ['PWD'].startswith("/eos")) & (opt.batch == "condor") & (not opt.dryRun):
+              fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .." % (_name, poi), fitcmd)
+          run(fitcmd)
+  # Significanace [HybridNew]
+  elif _fit.split(":")[0] == "HybridNew":
+      for poi in _fitpois:
+          # Standard command including exp_opts
+          fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M HybridNew -m %s %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .." % (opt.ext, opt.mode, _name, poi, opt.mass, d_opts, exp_opts, _name, poi, poi, _fit_opts, pdf_opts, common_opts, job_opts)
+          if (os.environ['PWD'].startswith("/eos")) & (opt.batch == "condor") & (not opt.dryRun):
+              fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .." % (_name, poi), fitcmd)
+          run(fitcmd)
+
+
