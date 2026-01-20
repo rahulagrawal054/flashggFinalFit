@@ -11,7 +11,6 @@ python3 RunYields.py \
   --procs auto \
   --ext tth_th_analysis \
   --mergeYears \
-  --skipCOWCorr \
   --skipZeroes \
   --batch local
 
