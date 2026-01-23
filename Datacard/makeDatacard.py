@@ -29,7 +29,7 @@ def get_options():
   parser.add_option('--inputFiles', default='./', help="Path to the input .pkl file.")
   parser.add_option('--outputDir', default='./', help="Path to the output directory.")
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
-  parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
+  parser.add_option('--years', dest='years', default='2022preEE,2022postEE,2023preBPix,2023postBPix', help="Comma separated list of years in makeYields output")
   parser.add_option('--variable', dest='variable', default='', help='Considered variable for the addition of variable specific systematics (e.g. JEC, JES, etc.).')
   # For pruning processes
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category")
@@ -94,22 +94,61 @@ if opt.doSystematics:
   experimentalFactoryType = {}
   theoryFactoryType = {}
   mask = (~data['cat'].str.contains("NOTAG"))&(data['type']=='sig')
+
+
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # DEBUG: EXPERIMENTAL SYSTEMATICS LOOPS
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  # ------------------------------------------------------------------------------
+  # LOOP 1: SETUP PHASE (Determine Factory Types)
+  # Goal: Figure out HOW to calculate each systematic (without changing data yet)
+  # ------------------------------------------------------------------------------
+  print("\n" + "="*60)
+  print(" DEBUG: STARTING EXPERIMENTAL LOOP 1 (SETUP)")
+  print(" Goal: Populate experimentalFactoryType dictionary")
+  print("="*60)
+
   for s in experimental_systematics:
+    print(f" -> Inspecting: {s['name']} (Type: {s['type']})")
+
+    # Logic to skip JEC/JER if not analyzing jets
     if opt.variable != '':
       if (not opt.variable in jetVariables) and ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        print("    [SKIP] Reason: Variable specific run, but not a jet variable.")
         continue
     else: # Inclusive run
       if ((s['name'] == 'JecSystTotal') or (s['name'] == 'JerSyst')):
+        print("    [SKIP] Reason: Inclusive run (JEC/JER usually skipped here).")
         continue
+
+    # If it is a Factory Type, we calculate the instruction
     if s['type'] == 'factory': 
       # Fix for HEM as only in 2018 workspaces
-      if s['name'] == 'JetHEM': experimentalFactoryType[s['name']] = "a_h"
+      if s['name'] == 'JetHEM': 
+          print("    [ACTION] Setting HEM fix (2018 only)")
+          experimentalFactoryType[s['name']] = "a_h"
       else: 
+        # This calls the factoryType function to guess if it is 'a_w', 'a_h', etc.
+        # We check 'mask' exists first to be safe in debug print
+        print(f"    [ACTION] Determined Factory Type: {factoryType(data[mask],s)}")
         experimentalFactoryType[s['name']] = factoryType(data[mask],s)
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  #
+  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
   for s in theory_systematics:
     if s['type'] == 'factory': 
       theoryFactoryType[s['name']] = factoryType(data[mask],s)
   
+  # ------------------------------------------------------------------------------
+  # LOOP 2: ACTION PHASE (Apply Constants & Finalize List)
+  # Goal: Apply constant values NOW and filter the list for the Factory call
+  # ------------------------------------------------------------------------------
+  print("\n" + "="*60)
+  print(" DEBUG: STARTING EXPERIMENTAL LOOP 2 (ACTION)")
+  print(" Goal: Add Constant Syst & Prepare List for Factory")
+  print("="*60)
   # Experimental:
   print(" --> Adding experimental systematics variations to dataFrame")
   # Add constant systematics to dataFrame
@@ -130,6 +169,9 @@ if opt.doSystematics:
     ]
   else:
     experimentalSystematics = experimental_systematics
+  print(f"\n --> Final List passed to experimentalSystFactory has {len(experimentalSystematics)} items.")
+  print("="*60 + "\n")
+
   data = experimentalSystFactory(data, experimentalSystematics, experimentalFactoryType, opt )
 
   # Theory:
@@ -138,15 +180,24 @@ if opt.doSystematics:
   for s in theory_systematics:
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
   # Theory factory: group scale weights after calculation in relevant grouping scheme
+  print("Before theorySystFactory:")
+  print("  nSyst =", len(theory_systematics))
+  print("  syst titles =", [s['title'] for s in theory_systematics])
+
   data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=STXSMergingScheme)
+  print("After theorySystFactory:")
+  print("  syst titles =", [s['title'] for s in theory_systematics])
   #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
   # Changed to nanoAOD conventions based on advice by Jon, 22nd of Feb 2024
   data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="weight_LHEScal", groupings=[[0,8],[1,7],[3,5]], stxsMergeScheme=STXSMergingScheme)
+  print("After groupSystematics:")
+  print("  syst titles =", [s['title'] for s in theory_systematics])
   #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=STXSMergingScheme)
-
   # Rename systematics
   for s in theory_systematics: s['title'] = renameSyst(s['title'],"scaleWeight","scale")
-
+  print("After rename theory systematics:")
+  for s in theory_systematics:
+       print(s['title'])
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pruning: if process contributes less than 0.1% of yield in analysis category then ignore
