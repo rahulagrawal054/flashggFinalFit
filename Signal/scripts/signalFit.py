@@ -90,14 +90,23 @@ if opt.analysis not in globalXSBRMap:
 else: xsbrMap = globalXSBRMap[opt.analysis]
 
 # Load RooRealVars
+print("Input WS dir:", opt.inputWSDir)
 nominalWSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,MHNominal,opt.proc))[0]
+print("Using file:", nominalWSFileName)
 f0 = ROOT.TFile(nominalWSFileName,"read")
+print("File opened:", not f0.IsZombie())
 inputWS0 = f0.Get(inputWSName__)
+print("Workspace:", inputWS0)
 xvar = inputWS0.var(opt.xvar)
+print("xvar:", xvar)
 xvarFit = xvar.Clone()
+print("xvarFit cloned")
 dZ = inputWS0.var("dZ")
+print("dZ:", dZ)
 aset = ROOT.RooArgSet(xvar,dZ)
+print("RooArgSet created:", aset)
 f0.Close()
+print("File closed")
 
 # Create MH var
 MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
