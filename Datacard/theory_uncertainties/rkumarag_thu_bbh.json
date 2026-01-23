@@ -1,0 +1,7 @@
+{
+    "bbh_incl":{
+        "QCDscale_bbH":[1.202,0.761],
+        "pdf_Higgs_bbH":1.032,
+        "alphaS_bbH":1.020
+    }
+}
