@@ -9,7 +9,8 @@ import pickle
 from collections import OrderedDict as od
 from commonObjects import *
 from commonTools import *
-from signalTools import *
+#from signalTools import *
+from tools.signalTools import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 # Function to load XS/BR from Combine
