@@ -249,6 +249,15 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
                   p = re.sub("_2017_hgg","",p)
                   p = re.sub("_2018_hgg","",p)
                   p = re.sub("_2022preEE_hgg","",p)
+                  p = re.sub("_2022postEE_hgg","",p)
+                  p = re.sub("_2023preBPix_hgg","",p)
+                  p = re.sub("_2023postBPix_hgg","",p)
+                  # Add value if in proc in phase space else -
+                  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
+                  # Add value if in proc in phase space else -
+                  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
+                  # Add value if in proc in phase space else -
+                  if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
                   # Add value if in proc in phase space else -
                   if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
                   else: sval = '-'
