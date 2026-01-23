@@ -50,7 +50,16 @@ def addConstantSyst(sd,_syst,options):
     else:
       # If signal and not NOTAG then set value
       print(f"  --> Filling constant value {_syst['value']} for all signal rows (excluding NOTAG)")
-      sd.loc[(sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG")), _syst['name']] = _syst['value']
+      mask = (sd['type']=='sig') & (~sd['cat'].str.contains("NOTAG"))
+      if "lumi_13p6TeV_2022" in _syst['name']:
+          print("      (Applying ONLY to 2022 rows)")
+          mask = mask & (sd['year'].str.contains("2022"))
+
+      elif "lumi_13p6TeV_2023" in _syst['name']:
+          print("      (Applying ONLY to 2023 rows)")
+          mask = mask & (sd['year'].str.contains("2023"))
+      
+      sd.loc[mask, _syst['name']] = _syst['value']
 
   # Partial correlation
   elif _syst['correlateAcrossYears'] == -1:
