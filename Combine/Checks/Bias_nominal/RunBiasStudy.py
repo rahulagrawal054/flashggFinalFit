@@ -16,7 +16,7 @@ parser.add_option("-c","--combineOptions",default="")
 parser.add_option("-s","--seed",default=-1,type="int")
 parser.add_option("--dryRun",action="store_true", default=False)
 parser.add_option("--poi",default="r_ttH")
-parser.add_option("--split",default=500,type="int")
+parser.add_option("--split",default=1200,type="int")
 parser.add_option("--selectFunction",default=None)
 parser.add_option("--gaussianFit",action="store_true", default=False)
 (opts,args) = parser.parse_args()
@@ -56,7 +56,7 @@ for ipdf in range(multipdf.getNumPdfs()):
     indexNameMap[ipdf] = multipdf.getPdf(ipdf).GetName()
 
 if opts.toys:
-    if not path.isdir('BiasToysn'): os.system('mkdir -p BiasToys')
+    if not path.isdir('BiasToys'): os.system('mkdir -p BiasToys')
     toyCmdBase = 'combine -m %.4f -d %s -M GenerateOnly --expectSignal %.4f -s %g --saveToys %s --toysNoSystematics'%(opts.mH, opts.datacard, opts.expectSignal, opts.seed, opts.combineOptions)
     for ipdf,pdfName in indexNameMap.items():
         name = shortName(pdfName)

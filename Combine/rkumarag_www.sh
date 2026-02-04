@@ -14,6 +14,7 @@ echo ">> Creating web directory: $DEST_DIR"
 mkdir -p "$DEST_DIR"
 
 echo ">> Copying plots..."
+find Datacard.txt "$DEST_DIR" \;
 find runFits_* -path "*/Plots/CombinePlot*" \( -name "*.pdf" -o -name "*.png" -o -name "*.root" \) -exec cp {} "$DEST_DIR" \;
 find Impacts_* \( -name "*.pdf" \) -exec cp {} "$DEST_DIR" \;
 

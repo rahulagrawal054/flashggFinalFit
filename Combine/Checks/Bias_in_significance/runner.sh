@@ -1,61 +1,40 @@
 #!/bin/bash
 
 # Categories
-CATS=("tH_had_1" "tH_had_2" "ttH_had_1" "ttH_had_2" "ttH_lep_1" "ttH_lep_2" "tH_lep_1" "tH_lep_2")
+CATS=(
+  "ttH_had_1" "ttH_had_2"
+  "ttH_lep_1" "ttH_lep_2"
+)
 
-# Base paths
-SRC_DIR="/eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine"
-BIAS_DIR="$SRC_DIR/Checks/Bias_in_significance"
+EOS_BASE="/eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/Checks/Bias_in_significance"
+WWW_BASE="/eos/user/r/rkumarag/www"
+TIMESTAMP=$(date +"%d%b_%H%M")
+FOLDER="biasStudy_${TIMESTAMP}"
 
-# Move into SRC directory
-cd $SRC_DIR || exit
-
-echo "Running Text2Workspace for all categories..."
 for CAT in "${CATS[@]}"; do
-    python3 RunText2Workspace.py --mode r_ttH_1D --batch local --ext $CAT
-done
+  echo "----------------------------------------"
+  echo "Processing category: ${CAT}"
+  echo "----------------------------------------"
 
-echo "Starting Bias-in-Significance workflow..."
-# Loop over categories
-for CAT in "${CATS[@]}"; do
+  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode setup
+  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode generate
+  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode fixed
+  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode envelope
 
-    echo "----------------------------------------"
-    echo "Processing category: $CAT"
-    echo "----------------------------------------"
+  python3 $EOS_BASE/SummaryBiasSignificance.py
 
-    DATACARD_SRC="${SRC_DIR}/Datacard_${CAT}.root"
-    DATACARD_DST="${BIAS_DIR}/Datacard_${CAT}.root"
+  OUT_DIR="${EOS_BASE}/${FOLDER}/${CAT}"
+  WWW_DIR="${WWW_BASE}/${FOLDER}/${CAT}"
 
-    # 1. Move datacard into Bias_in_significance directory
-    echo "Moving datacard → $BIAS_DIR"
-    mv $DATACARD_SRC $DATACARD_DST
+  mkdir -p "${OUT_DIR}" "${WWW_DIR}"
 
-    # 2. Move into Bias_in_significance directory
-    cd $BIAS_DIR
+  mv $EOS_BASE/higgsCombine_initial.MultiDimFit.mH125.38.root "${OUT_DIR}/" 2>/dev/null
+  mv $EOS_BASE/pdfindex.json $EOS_BASE/toys.root $EOS_BASE/fit_fixed.root $EOS_BASE/fit_envelope.root $EOS_BASE/combine_logger.out "${OUT_DIR}/" 2>/dev/null
+  mv $EOS_BASE/Plots "${OUT_DIR}/" 2>/dev/null
 
-    # 3. Run all bias study modes
-    python3 RunBiasInSignificance.py --inputWSFile Datacard_${CAT}.root --MH 125.38 --mode setup
-    python3 RunBiasInSignificance.py --inputWSFile Datacard_${CAT}.root --MH 125.38 --mode generate
-    python3 RunBiasInSignificance.py --inputWSFile Datacard_${CAT}.root --MH 125.38 --mode fixed
-    python3 RunBiasInSignificance.py --inputWSFile Datacard_${CAT}.root --MH 125.38 --mode envelope
+  cp -r "${OUT_DIR}/Plots/"* "${WWW_DIR}/" 2>/dev/null
 
-    # 4. Run summary
-    python3 SummaryBiasSignificance.py
-
-    # 5. Create output directory named after category
-    mkdir -p $CAT
-
-    # 6. Move relevant produced files into the category directory
-    mv higgsCombine_initial.MultiDimFit.mH125.38.root $CAT/ 2>/dev/null
-    mv pdfindex.json $CAT/ 2>/dev/null
-    mv toys.root $CAT/ 2>/dev/null
-    mv fit_fixed.root $CAT/ 2>/dev/null
-    mv fit_envelope.root $CAT/ 2>/dev/null
-    mv combine_logger.out $CAT/ 2>/dev/null
-    mv plots $CAT/ 2>/dev/null
-
-    echo "Finished processing category: $CAT"
-    echo ""
+  echo "Finished processing category: ${CAT}"
 done
 
 echo "All categories completed."
