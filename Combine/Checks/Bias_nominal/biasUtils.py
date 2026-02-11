@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 from os import system, path
 
@@ -28,22 +29,25 @@ def raiseFailError(itoy, lax=False):
 def shortName(name):
     return name.split('_')[-1]
 
-def toyName(name, split=None):
-    retval = 'BiasToys/biasStudy_%s_toys.root'%name
-    if split is not None: 
+def toyName(name, expectSignal, split=None):
+    retval = f'BiasToys_Expected.{expectSignal}/biasStudy_{name}_toys.root'
+    if split is not None:
         split = int(split)
-        retval = retval.replace(name,'%s_split%g'%(name,split))
+        retval = retval.replace(name, f'{name}_split{split}')
     return retval
 
-def fitName(name, split=None):
-    retval = 'BiasFits/biasStudy_%s_fits.root'%name
-    if split is not None: 
+
+def fitName(name, expectSignal, split=None):
+    retval = f'BiasFits_Expected.{expectSignal}/biasStudy_{name}_fits.root'
+    if split is not None:
         split = int(split)
-        retval = retval.replace(name,'%s_split%g'%(name,split))
+        retval = retval.replace(name, f'{name}_split{split}')
     return retval
 
-def plotName(name):
-    return 'BiasPlots/biasStudy_%s_pulls'%name
+
+def plotName(name, expectSignal):
+    return f'BiasPlots_Expected.{expectSignal}/biasStudy_{name}_pulls'
+
 
 def run(cmd, dry=False):
    print(cmd)
