@@ -63,6 +63,17 @@ models = {
     --PO "map=.*/tHqLep_incl.*:r_tH[1,-25,25]" \
     --PO "map=.*/tHW_incl.*:r_tH[1,-25,25]" """,
 
+"r_tHq_plus_tHW_1D_Bias":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1" \
+    --PO "map=.*/tth_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/tHqHad_incl.*:r_tH[1,-50,50]" \
+    --PO "map=.*/tHqLep_incl.*:r_tH[1,-50,50]" \
+    --PO "map=.*/tHW_incl.*:r_tH[1,-50,50]" """,
+
 "r_tHq_plus_tHW_1D_ttH_profiled":
     """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
     --PO "map=.*/ggh_incl.*:1" \
