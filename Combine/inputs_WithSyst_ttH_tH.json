@@ -1,0 +1,97 @@
+{
+  "_comment_1": "================ 1) 2D Scans ================",
+  "r_2D": {
+    "pois": "r_tHq,r_ttH",
+    "fits": "profile2D:WithSyst_fixedMH:all",
+    "points": "5000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tHq=-5.0,20.0:r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
+  },
+
+  "_comment_2": "================ 2) Signal strength: ttH (ttH+tHW) ================",
+  "r_ttH_1D": {
+    "pois": "r_ttH",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_ttH=-0.5,3.0 --saveSpecifiedNuis all"
+  },
+  "r_ttH_1D_tHq_profiled": {
+    "pois": "r_ttH",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tHq=-5.0,20.0:r_ttH=-0.5,3.0 --saveSpecifiedNuis all"
+  },
+
+  "_comment_3": "================ 3) Signal strength: tH (tHq+tHW) ================",
+  "r_tHq_plus_tHW_1D": {
+    "pois": "r_tH",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tH=-25.0,25.0 --saveSpecifiedNuis all"
+  },
+  "r_tHq_plus_tHW_1D_ttH_profiled": {
+    "pois": "r_tH",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tH=-25.0,25.0:r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
+  },
+
+  "_comment_4": "================ 4) Signal strength: tHq (Only tHq) ================",
+  "r_tHq_1D": {
+    "pois": "r_tHq",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tHq=-25.0,25.0 --saveSpecifiedNuis all"
+  },
+  "r_tHq_1D_ttH_profiled": {
+    "pois": "r_tHq",
+    "fits": "profile1D:WithSyst_fixedMH:all",
+    "points": "1000:50",
+    "fit_opts": "--freezeParameters MH --setParameterRanges r_tHq=-25.0,25.0:r_ttH=-0.5,2.5 --saveSpecifiedNuis all"
+  },
+
+  "_comment_5": "================ 5) Significance (Z) ================",
+  "Z_ttH": {
+    "pois": "r_ttH",
+    "fits": "Significance:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--significance --expectSignal 1 --setParameterRanges r_ttH=0.0,10.0 --freezeParameters MH"
+  },
+  "Z_tHq_plus_tHW": {
+    "pois": "r_tH",
+    "fits": "Significance:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--setParameterRanges r_tH=0.0,25.0 --freezeParameters MH"
+  },
+  "Z_tHq": {
+    "pois": "r_tHq",
+    "fits": "Significance:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--setParameterRanges r_tHq=0.0,25.0 --freezeParameters MH"
+  },
+
+  "_comment_6": "================ 6) Limits (Asymptotic & HybridNew) ================",
+  "limit_tHq_plus_tHW": {
+    "pois": "r_tH",
+    "fits": "AsymptoticLimit:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--run blind --setParameterRanges r_tH=0,25 --freezeParameters MH"
+  },
+  "limit_tHq_plus_tHW_HybridNew": {
+    "pois": "r_tH",
+    "fits": "HybridNew:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--LHCmode LHC-limits --setParameterRanges r_tH=0,25 --freezeParameters MH --saveHybridResult"
+  },
+  "limit_tHq": {
+    "pois": "r_tHq",
+    "fits": "AsymptoticLimit:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--run blind --setParameterRanges r_tHq=0,25 --freezeParameters MH"
+  },
+  "limit_tHq_HybridNew": {
+    "pois": "r_tHq",
+    "fits": "HybridNew:WithSyst_fixedMH:all",
+    "points": "1",
+    "fit_opts": "--LHCmode LHC-limits --setParameterRanges r_tHq=0,25 --freezeParameters MH --saveHybridResult"
+  }
+}
