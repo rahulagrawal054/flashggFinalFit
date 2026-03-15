@@ -1,41 +1,79 @@
 #!/bin/bash
 
-# Categories
-CATS=(
-  "ttH_had_1" "ttH_had_2"
-  "ttH_lep_1" "ttH_lep_2"
+# --- Configuration ---
+DATACARDS=(
+    "Datacard_StatOnly_tH_lep_1.root"
+    "Datacard_StatOnly_tH_lep_2.root"
+    "Datacard_StatOnly_tH_had_1.root"
+    "Datacard_StatOnly_tH_had_2.root"
+    "Datacard_StatOnly_ttH_lep_1.root"
+    "Datacard_StatOnly_ttH_lep_2.root"
+    "Datacard_StatOnly_ttH_had_1.root"
+    "Datacard_StatOnly_ttH_had_2.root"
 )
 
-EOS_BASE="/eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/Checks/Bias_in_significance"
-WWW_BASE="/eos/user/r/rkumarag/www"
-TIMESTAMP=$(date +"%d%b_%H%M")
-FOLDER="biasStudy_${TIMESTAMP}"
+MH="125.38"
+NTOYS=20000
+SEED="12345"
 
-for CAT in "${CATS[@]}"; do
-  echo "----------------------------------------"
-  echo "Processing category: ${CAT}"
-  echo "----------------------------------------"
+for WS_FILE in "${DATACARDS[@]}"; do
+    if [ ! -f "$WS_FILE" ]; then 
+        echo "Warning: $WS_FILE not found, skipping..."
+        continue 
+    fi
 
-  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode setup
-  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode generate
-  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode fixed
-  python3 $EOS_BASE/RunBiasInSignificance.py --inputWSFile "$EOS_BASE/Datacard_${CAT}.root" --MH 125.38 --mode envelope
+    # Determine POI based on filename
+    if [[ "$WS_FILE" == *"ttH"* ]]; then
+        CURRENT_POI="r_ttH"
+    else
+        CURRENT_POI="r_tH"
+    fi
 
-  python3 $EOS_BASE/SummaryBiasSignificance.py
+    # Extract Directory Name
+    DIR_NAME=$(echo $WS_FILE | sed 's/Datacard_//;s/.root//')
 
-  OUT_DIR="${EOS_BASE}/${FOLDER}/${CAT}"
-  WWW_DIR="${WWW_BASE}/${FOLDER}/${CAT}"
+    echo "-------------------------------------------------------"
+    echo "Starting Bias Study for: $DIR_NAME"
+    echo "Using POI: $CURRENT_POI"
+    echo "-------------------------------------------------------"
 
-  mkdir -p "${OUT_DIR}" "${WWW_DIR}"
+    # --- Run Python Workflow ---
+    # FIXED: Changed $POI to $CURRENT_POI
+    echo "Step 1: Setup"
+    python3 RunBiasInSignificance.py --inputWSFile $WS_FILE --POI $CURRENT_POI --MH $MH --mode setup
 
-  mv $EOS_BASE/higgsCombine_initial.MultiDimFit.mH125.38.root "${OUT_DIR}/" 2>/dev/null
-  mv $EOS_BASE/pdfindex.json $EOS_BASE/toys.root $EOS_BASE/fit_fixed.root $EOS_BASE/fit_envelope.root $EOS_BASE/combine_logger.out "${OUT_DIR}/" 2>/dev/null
-  mv $EOS_BASE/Plots "${OUT_DIR}/" 2>/dev/null
+    echo "Step 2: Generate Toys"
+    python3 RunBiasInSignificance.py --mode generate --seed $SEED --POI $CURRENT_POI --MH $MH --nToys $NTOYS
 
-  cp -r "${OUT_DIR}/Plots/"* "${WWW_DIR}/" 2>/dev/null
+    echo "Step 3: Fixed Significance"
+    python3 RunBiasInSignificance.py --inputWSFile $WS_FILE --MH $MH --mode fixed --nToys $NTOYS --POI $CURRENT_POI
 
-  echo "Finished processing category: ${CAT}"
+    echo "Step 4: Envelope Significance"
+    python3 RunBiasInSignificance.py --inputWSFile $WS_FILE --MH $MH --mode envelope --nToys $NTOYS --POI $CURRENT_POI
+
+    echo "Step 5: Summary and Plotting"
+    python3 SummaryBiasSignificance.py
+
+    # --- Cleanup and Organization ---
+    echo "Moving files to directory: $DIR_NAME"
+    mkdir -p $DIR_NAME
+
+    mv $WS_FILE $DIR_NAME/
+    mv higgsCombine_initial.MultiDimFit.mH$MH.root $DIR_NAME/
+    mv pdfindex.json $DIR_NAME/
+    
+    # FIXED: Use variables for the toy filename so it's dynamic
+    mv higgsCombine_toy_$NTOYS.GenerateOnly.mH$MH.$SEED.root $DIR_NAME/ 2>/dev/null || mv toys.root $DIR_NAME/
+    
+    mv fit_fixed.root $DIR_NAME/
+    mv fit_envelope.root $DIR_NAME/
+    mv combine_logger.out $DIR_NAME/ 2>/dev/null || true 
+
+    if [ -d "plots" ]; then
+        mv plots $DIR_NAME/
+    fi
+
+    echo "-------------------------------------------------------"
+    echo "Work Complete. Results are in $DIR_NAME"
+    echo "-------------------------------------------------------"
 done
-
-echo "All categories completed."
-
