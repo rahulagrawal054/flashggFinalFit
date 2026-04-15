@@ -12,6 +12,13 @@ tH_lep_2
 )
 
 for c in "${cats[@]}"; do
-    combineCards.py /eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/Datacard_lumi5Times.txt --ic $c > Datacard_lumi5Times_${c}.txt
-done
+    outfile="Datacard_${c}.txt"
 
+    # Create datacard
+    combineCards.py /eos/user/r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/Datacard.txt --ic "$c" > "$outfile"
+
+    # Keep only matching pdfindex line, remove others
+    sed -i "/pdfindex_/!b; /pdfindex_${c}_13TeV/b; d" "$outfile"
+
+    echo "Processed $outfile"
+done
