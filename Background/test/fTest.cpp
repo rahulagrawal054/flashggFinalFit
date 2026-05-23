@@ -210,7 +210,7 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   	    // Now the toys should be thrown only in the sidebands
         RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),
         RooFit::NumEvents(ndata),
-        RooFit::Range(MASS_FIT_RANGE),
+        // RooFit::Range(MASS_FIT_RANGE),
         RooFit::ExpectedData(false),
         RooFit::Extended(false));
 
@@ -311,7 +311,8 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 
   // get The Chi2 value from the data
   RooPlot *plot_chi2 = mass->frame();
-  data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"),RooFit::Range(MASS_FIT_RANGE));
+  // data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"),RooFit::Range(MASS_FIT_RANGE));
+  data->plotOn(plot_chi2,Binning(nBinsForMass),Name("data"),CutRange(MASS_FIT_RANGE));
 
   pdf->plotOn(plot_chi2,Name("pdf"),RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
     RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent));
@@ -340,14 +341,15 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
       int nToyEvents = RandomGen->Poisson(ndata);
       RooDataHist *binnedtoy = pdf->generateBinned(RooArgSet(*mass),
         RooFit::NumEvents(nToyEvents),
-        RooFit::Range(MASS_FIT_RANGE),
+        // RooFit::Range(MASS_FIT_RANGE),
         RooFit::ExpectedData(false),
         RooFit::Extended(false));
       pdf->fitTo(*binnedtoy,RooFit::Minimizer("Minuit2","minimize"),RooFit::Minos(0),RooFit::Hesse(0),RooFit::PrintLevel(-1),RooFit::Strategy(0),RooFit::SumW2Error(kTRUE),RooFit::Range(MASS_FIT_RANGE)); 
 
       RooPlot *plot_t = mass->frame();
       const double toyEntries = binnedtoy->sumEntries();
-      binnedtoy->plotOn(plot_t,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+      //binnedtoy->plotOn(plot_t,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+      binnedtoy->plotOn(plot_t,Binning(nBinsForMass),CutRange(MASS_FIT_RANGE));
       pdf->plotOn(plot_t,RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
         RooFit::Normalization(toyEntries,RooAbsReal::NumEvent));
 
@@ -391,7 +393,8 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   // Chi2 taken only from the sidebands 
   const double sidebandEntries = data->sumEntries();
   RooPlot *plot_chi2 = mass->frame();
-  data->plotOn(plot_chi2,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+  // data->plotOn(plot_chi2,Binning(nBinsForMass),RooFit::Range(MASS_FIT_RANGE));
+  data->plotOn(plot_chi2,Binning(nBinsForMass),CutRange(MASS_FIT_RANGE));
   pdf->plotOn(plot_chi2,RooFit::Range(MASS_FIT_RANGE),RooFit::NormRange(MASS_FIT_RANGE),
     RooFit::Normalization(sidebandEntries,RooAbsReal::NumEvent));
 
@@ -412,7 +415,8 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE));
+  // else data->plotOn(plot,Binning(mgg_high-mgg_low));
+  else data->plotOn(plot,Binning(mgg_high-mgg_low));
 
  // data->plotOn(plot,Binning(mgg_high-mgg_low));
   TCanvas *canv = new TCanvas();
@@ -453,7 +457,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE)); 
+  else data->plotOn(plot,Binning(mgg_high-mgg_low)); 
   TCanvas *canv = new TCanvas();
   ///start extra bit for ratio plot///
   TPad *pad1 = new TPad("pad1","pad1",0,0.25,1,1);
@@ -612,7 +616,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     data->plotOn(plot,Binning(mgg_high-mgg_low),CutRange("unblindReg_2"));
     data->plotOn(plot,Binning(mgg_high-mgg_low),Invisible());
   }
-  else data->plotOn(plot,Binning(mgg_high-mgg_low),RooFit::Range(MASS_FIT_RANGE));
+  else data->plotOn(plot,Binning(mgg_high-mgg_low));
 
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
 	if(flashggCats_.size() >0){
@@ -737,6 +741,7 @@ int main(int argc, char* argv[]){
  
   setTDRStyle();
   writeExtraText = true;       // if extra text
+  TString lumi_13p6TeV;
   extraText  = "Preliminary";  // default extra text is "Preliminary"
   lumi_13p6TeV = "61.9 fb^{-1}";
   lumi_8TeV  = "19.1 fb^{-1}"; // default is "19.7 fb^{-1}"
