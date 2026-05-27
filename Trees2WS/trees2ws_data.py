@@ -124,7 +124,7 @@ f = ROOT.TFile(opt.inputTreeFile)
 # Open output ROOT file and initiate workspace to store RooDataSets
 if opt.outputWSDir is not None: outputWSDir = opt.outputWSDir+"/ws"
 else: outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
-if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+os.makedirs(outputWSDir, exist_ok=True)
 outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
 print(" --> Creating output workspace: (%s)"%outputWSFile)
 fout = ROOT.TFile(outputWSFile,"RECREATE")
