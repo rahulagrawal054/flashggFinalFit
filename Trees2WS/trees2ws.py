@@ -56,8 +56,7 @@ import awkward as ak
 
 from commonTools import *
 from commonObjects import *
-from tools.STXS_tools import *
-
+from T2WSTools.STXS_tools import *
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
   print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -72,7 +71,8 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   # Add vars specified by dataframe columns: skipping cat, stxsvar and type
   _vars = od()
   for var in _data.columns:
-    if var in ['type','cat',_stxsVar,'']: continue
+    if var in ['type','cat',_stxsVar]: continue
+    if 'fiducial' in var: continue
     if var == "CMS_hgg_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
@@ -95,7 +95,6 @@ def make_argset(_ws=None,_varNames=None):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Production modes to skip theory weights: fill with 1's
-# modesToSkipTheoryWeights = ['bbh','thq','thw']
 modesToSkipTheoryWeights = []
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -365,7 +364,7 @@ for fiducialId in fiducialIds:
     outputWSDir = opt.outputWSDir+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag) # Multiple slashes are normalised away, no worries ("../test/" and "../test" are equivalent)
   else:
     outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s_%s"%(dataToProc(opt.productionMode), fidTag)
-  os.makedirs(outputWSDir, exist_ok=True)
+  if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
   outputWSFile = outputWSDir+"/"+re.sub(".root","_%s_%s.root"%(dataToProc(opt.productionMode), fidTag),opt.inputTreeFile.split("/")[-1])
   print(" --> Creating output workspace: (%s)"%outputWSFile)
   
@@ -396,7 +395,7 @@ if opt.doSTXSSplitting:
 
     # Define output workspace file
     outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%stxsBin
-    os.makedirs(outputWSDir, exist_ok=True)
+    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
     outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%stxsBin,opt.inputTreeFile.split("/")[-1])
     print(" --> Creating output workspace for STXS bin: %s (%s)"%(stxsBin,outputWSFile))
 
