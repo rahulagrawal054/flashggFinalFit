@@ -85,8 +85,8 @@ def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
     ndata = d.weight()
     if ndata*ndata == 0: continue
     npdf = pdf.getVal(ROOT.RooArgSet(x))*normFactor*d.binVolume()
+    # eLo, eHi = ROOT.Double(), ROOT.Double()
     eLo, eHi = ctypes.c_double(), ctypes.c_double()
-    #eLo, eHi = ROOT.Double(), ROOT.Double()
     d.weightError(eLo,eHi,ROOT.RooAbsData.SumW2)
     bins.append(i)
     nPdf.append(npdf)
@@ -97,8 +97,8 @@ def calcChi2(x,pdf,d,errorType="Poisson",_verbose=False,fitRange=[110,140]):
   # Convert to numpy array
   nPdf = np.asarray(nPdf)
   nData = np.asarray(nData)
+  # eDataSumW2 = np.asarray(eDataSumW2)
   eDataSumW2 = np.asarray([e.value for e in eDataSumW2], dtype=float)
-  #eDataSumW2 = np.asarray(eDataSumW2)
 
   if errorType == 'Poisson':
     # Change error to poisson intervals: take max interval as error

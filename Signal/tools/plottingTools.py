@@ -4,13 +4,26 @@ import json
 from collections import OrderedDict as od
 from commonObjects import *
 
+
+def drawCMS(onTop=False, CMSString="Simulation Private Work", sqrts=13.6):
+    text='#bf{CMS} #scale[0.75]{#it{'+CMSString+'}}'
+    latex = ROOT.TLatex()
+    latex.SetNDC()
+    latex.SetTextFont(42)
+    latex.SetTextSize(0.05)
+    latex.DrawLatex(0.1, 0.85 if not onTop else 0.91, text)
+    if sqrts is not None: latex.DrawLatex(1.00-canv.GetRightMargin()-0.02,1.00-canv.GetTopMargin()-0.12,'('+sqrts+' TeV)')
+
+
 def LoadTranslations(jsonfilename):
     with open(jsonfilename) as jsonfile:
         return json.load(jsonfile)
+
+
 def Translate(name, ndict):
     return ndict[name] if name in ndict else name
 
-# Function to extract the sigma effective of a histogram
+
 # Function to extract the sigma effective of a histogram
 def getEffSigma(_h):
   nbins, binw, xmin = _h.GetXaxis().GetNbins(), _h.GetXaxis().GetBinWidth(1), _h.GetXaxis().GetXmin()
@@ -127,8 +140,10 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
-  canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
+  # canv.SaveAs("%s/fTest_%s_%s_%s.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s.pdf"%(_outdir,_cat,_proc,_extension))
 
 # Plot reduced chi2 vs nGauss
@@ -176,8 +191,11 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
   lat.DrawLatex(0.6,0.75,"Optimum N_{gauss} = %s"%_opt)
+
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
-  canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
+  # canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.png"%(_outdir,_cat,_proc,_extension))
   canv.SaveAs("%s/fTest_%s_%s_%s_chi2_vs_nGauss.pdf"%(_outdir,_cat,_proc,_extension))
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -185,7 +203,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
 # Plot final pdf at MH = 125 (with data) + individual Pdf components
 def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   canv = ROOT.TCanvas()
-  canv.SetLeftMargin(0.15)
+  canv.SetLeftMargin(0.1)
   ssf.MH.setVal(125)
   LineColorMap = {0:ROOT.kAzure+1,1:ROOT.kRed-4,2:ROOT.kOrange,3:ROOT.kGreen+2,4:ROOT.kMagenta-9}
   pdfs = od()
@@ -270,6 +288,8 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   lat1.SetTextSize(0.035)
   lat1.DrawLatex(0.65,0.3,"#chi^{2}/n(dof) = %.4f"%(ssf.getChi2()/ssf.Ndof))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
+
   canv.Update()
   canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
   canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
@@ -317,6 +337,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   haxes = hists[list(hists.keys())[0]].Clone()
   haxes.GetXaxis().SetTitle("m_{#gamma#gamma} [GeV]")
   haxes.GetYaxis().SetTitle("Events / %.2f GeV"%((_finalModel.xvar.getMax()-_finalModel.xvar.getMin())/_finalModel.xvar.getBins()))
+  haxes.GetYaxis().SetTitleOffset(0.9)
   haxes.SetMinimum(0)
   haxes.SetMaximum(hmax*1.2)
   haxes.GetXaxis().SetRangeUser(100,150)
@@ -336,6 +357,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
 
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
   canv.SaveAs("%s/%s_model_vs_mH.png"%(_outdir,_finalModel.name))
@@ -417,6 +439,8 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.SetNDC()
   lat.SetTextSize(0.03)
   lat.DrawLatex(0.9,0.92,"%s"%(_finalModel.name))
+  # Decorate with CMS label
+  drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
   canv.Update()
   canv.SaveAs("%s/%s_splines.png"%(_outdir,_finalModel.name))
   canv.SaveAs("%s/%s_splines.pdf"%(_outdir,_finalModel.name))
@@ -450,12 +474,13 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   h_effSigma.GetXaxis().SetRangeUser(effSigma_low,effSigma_high)
 
   # Legend
-  if len(_opt.years.split(","))>1:
+  if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
     leg0 = ROOT.TLegend(0.15+offset,0.6,0.5+offset,0.82)
     leg0.SetFillStyle(0)
     leg0.SetLineColor(0)
     leg0.SetTextSize(0.03)
     leg0.AddEntry(_hists['data'],"Simulation","ep")
+    # leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model (%s)}"%year,"l")
     leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
     leg0.Draw("Same")
 
@@ -463,7 +488,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     leg1.SetFillStyle(0)
     leg1.SetLineColor(0)
     leg1.SetTextSize(0.03)
-    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"%s: #scale[0.8]{#sigma_{eff} = %1.2f GeV}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
+    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"#splitline{%s:}{#scale[0.8]{#sigma_{eff} = %1.2f GeV}}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
     leg1.Draw("Same")
 
     leg2 = ROOT.TLegend(0.15+offset,0.3,0.5+offset,0.45)
@@ -479,7 +504,8 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     leg.SetLineColor(0)
     leg.SetTextSize(0.03)
     leg.AddEntry(_hists['data'],"Simulation","lep")
-    leg.AddEntry(_hists['pdf'],"#splitline{Parametric}{model (%s)}"%year,"l")
+    # For publication: Do not display the years for the outside world in the legend
+    leg.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
     leg.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
     leg.Draw("Same")    
 
@@ -515,7 +541,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   _hists['pdf'].SetLineColor(4)
   _hists['pdf'].SetLineWidth(2)
   _hists['pdf'].Draw("Same Hist C")
-  if len(_opt.years.split(","))>1:
+  if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
     for year in _opt.years.split(","):
       _hists['pdf_%s'%year].SetLineColor( colorMap[year] )  
       _hists['pdf_%s'%year].SetLineStyle(2)
@@ -535,7 +561,8 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat0.SetNDC()
   lat0.SetTextSize(0.045)
   lat0.DrawLatex(0.15,0.92,"#bf{CMS} #it{%s}"%_opt.label)
-  lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  #lat0.DrawLatex(0.77,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
+  lat0.DrawLatex(0.77,0.92,"13.6 TeV")
   lat0.DrawLatex(0.16+offset,0.83,"H #rightarrow #gamma#gamma")
 
   # Load translations
@@ -548,7 +575,13 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   lat1.SetNDC(1)
   lat1.SetTextSize(0.035)
   if _opt.procs == 'all': procStr, procExt = "", ""
-  elif len(_opt.procs.split(","))>1: procStr, procExt = "Multiple processes", "_multipleProcs"
+  elif len(_opt.procs.split(","))>1: 
+    if "=" in _opt.procs:
+      # Format: multiProcessName=proc0,proc1,proc2,...
+      procStr, _ = _opt.procs.split("=")
+      procExt = procStr
+    else:
+      procStr, procExt = "Multiple processes", "_multipleProcs"
   else: procStr, procExt = Translate(_opt.procs,translateProcs), "_%s"%_opt.procs
  
   if len(_opt.years.split(","))>1: yearStr, yearExt = "", ""
@@ -556,11 +589,22 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
 
   if _opt.cats == 'all': catStr, catExt = "All categories", "all"
   elif _opt.cats == 'wall': catStr, catExt = "#splitline{All categories}{S/(S+B) weighted}", "wall"
-  elif len(_opt.cats.split(","))>1: procStr, procExt = "Multiple categories", "multipleCats"
+  elif len(_opt.cats.split(","))>1:     
+    if "=" in _opt.cats:
+      # Format: multiCategoryName=cat0,proc1,proc2,...
+      catStr, _ = _opt.cats.split("=")
+      catExt = catStr
+    else:
+      catStr, catExt = "Multiple categories", "multipleCats"
   else: catStr, catExt = Translate(_opt.cats,translateCats), _opt.cats
  
-  lat1.DrawLatex(0.85,0.86,"%s"%catStr)
+  if (_opt.translateCats is not None) and not(_opt.cats == "all"):
+    lat1.DrawLatex(0.85,0.86,"%s"%translateCats[catStr])
+  else:
+    lat1.DrawLatex(0.85,0.86,"%s"%catStr)
   lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
+
+  # drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
 

@@ -75,7 +75,7 @@ def initialiseXSBR():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 class FinalModel:
   # Constructor
-  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics):
+  def __init__(self,_ssfMap,_proc,_cat,_ext,_year,_sqrts,_datasets,_xvar,_MH,_MHLow,_MHHigh,_massPoints,_xsbrMap,_procSyst,_scales,_scalesCorr,_scalesGlobal,_smears,_smearsCorr,_doVoigtian,_useDCB,_skipVertexScenarioSplit,_skipSystematics, outputDir=swd__):
     self.ssfMap = _ssfMap
     self.proc = _proc
     self.procSyst = _procSyst # Signal process used for systematics (useful for low stat cases)
@@ -93,12 +93,14 @@ class FinalModel:
     self.massPoints = _massPoints
     self.intLumi = ROOT.RooRealVar("IntLumi","IntLumi",1.,0.,999999999.) # in pb^-1
     self.xsbrMap = _xsbrMap
+    self.outputDir = outputDir
     # Systematics
     self.skipSystematics = _skipSystematics
     self.scales = _scales
     self.scalesCorr = _scalesCorr
     self.scalesGlobal = _scalesGlobal
     self.smears = _smears
+    self.smearsCorr = _smearsCorr
     # Options:
     self.useDCB = _useDCB
     self.doVoigtian = _doVoigtian
@@ -183,11 +185,11 @@ class FinalModel:
   # Function for building Nuisance param map:
   def buildNuisanceMap(self):
     # Dict to store nuisances of different type in map
-    for sType in ['scales','scalesCorr','scalesGlobal','smears']:
+    for sType in ['scales','scalesCorr','scalesGlobal','smears','smearsCorr']:
       if getattr(self,sType) != '': self.NuisanceMap[sType] = od()
 
     # Extract calcPhotonSyst output
-    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,self.ext,self.cat)
+    psname = "%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(self.outputDir,self.ext,self.cat)
     if not os.path.exists(psname):
       print(" --> [ERROR] Photon systematics do not exist (%s). Please run calcPhotonSyst mode first or skip systematics (--skipSystematics)"%psname)
       sys.exit(1)
@@ -201,7 +203,7 @@ class FinalModel:
 
     else:
       # Add scales, scalesCorr, scalesGlobal, smears
-      for sType in ['scales','scalesCorr','scalesGlobal','smears']:
+      for sType in ['scales','scalesCorr','scalesGlobal','smears','smearsCorr']:
         for syst in getattr(self,sType).split(","):
           if syst == '': continue
 
@@ -343,7 +345,7 @@ class FinalModel:
               formula += "*%3.1f"%additionalFactor
           dependents.add(sInfo['param'])
       # Other systs: scales, scalesCorr, smears
-      for sType in ['scales','scalesCorr','smears']:
+      for sType in ['scales','scalesCorr','smears','smearsCorr']:
         if sType in self.NuisanceMap:
           for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['meanConst'].getVal()
@@ -363,7 +365,7 @@ class FinalModel:
     if not skipSystematics:
       # Add systematics
       formula += "*TMath::Max(1.e-2,(1."
-      for sType in ['scales','scalesCorr','smears']:
+      for sType in ['scales','scalesCorr','smears','smearsCorr']:
         if sType in self.NuisanceMap:
           for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['sigmaConst'].getVal()
@@ -380,7 +382,7 @@ class FinalModel:
     formula = "(1."
     if not skipSystematics:
       # Add systematics
-      for sType in ['scales','scalesCorr','smears']:
+      for sType in ['scales','scalesCorr','smears','smearsCorr']:
         if sType in self.NuisanceMap:
           for sName, sInfo in self.NuisanceMap[sType].items():
             c = sInfo['rateConst'].getVal()
