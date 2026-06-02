@@ -240,3 +240,133 @@ globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_75_150_Tag1"] = "RECO_
 globalReplacementMap["STXS"]["catRVMap"]["RECO_WH_LEP_PTV_GT150_Tag0"] = "RECO_WH_LEP_PTV_GT150_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag0"] = "RECO_ZH_LEP_Tag0"
 globalReplacementMap["STXS"]["catRVMap"]["RECO_ZH_LEP_Tag1"] = "RECO_ZH_LEP_Tag1"
+
+
+# Early Analysis
+globalReplacementMap["earlyAnalysis"] = od()
+# Wrong vertex stuff
+globalReplacementMap["earlyAnalysis"]['procWV'] = "GG2H"
+globalReplacementMap["earlyAnalysis"]['catWV'] = "worst_resolution"
+# Relacement processes for RV
+globalReplacementMap["earlyAnalysis"]['procRVMap'] = od()
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VBF"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "VH"
+globalReplacementMap["earlyAnalysis"]["procRVMap"]["best_resolution"] = "TTH"
+# Replacement categories for RV
+globalReplacementMap["earlyAnalysis"]["catRVMap"] = od()
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["GG2H"] = "GG2H"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["VBF"]  = "VBF"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["VH"]   = "VH"
+globalReplacementMap["earlyAnalysis"]["catRVMap"]["TTH"]  = "TTH"
+
+
+# Early Analysis WITH in/out splitting
+globalReplacementMap["earlyAnalysisInOut"] = od()
+# Wrong vertex stuff
+#globalReplacementMap["earlyAnalysisInOut"]['procWV'] = "GG2H_in"
+# With nico convention (ggh instead of GG2H)
+globalReplacementMap["earlyAnalysisInOut"]['procWV'] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]['catWV'] = "worst_resolution"
+# Relacement processes for RV
+globalReplacementMap["earlyAnalysisInOut"]['procRVMap'] = od()
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["best_resolution"] = "GG2H_in"
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["medium_resolution"] = "GG2H_in"
+#globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["worst_resolution"] = "GG2H_in"
+# With nico convention (ggh instead of GG2H)
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["best_resolution"] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["medium_resolution"] = "ggh_in"
+globalReplacementMap["earlyAnalysisInOut"]["procRVMap"]["worst_resolution"] = "ggh_in"
+# Replacement categories for RV
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"] = od()
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["best_resolution"] = "best_resolution"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["medium_resolution"]  = "medium_resolution"
+globalReplacementMap["earlyAnalysisInOut"]["catRVMap"]["worst_resolution"]   = "worst_resolution"
+
+
+# ttH / tH run 3 measurement
+globalReplacementMap["tth_th_analysis"] = od()
+# Wrong vertex stuff
+globalReplacementMap["tth_th_analysis"]['procWV'] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]['catWV'] = "tH_lep_2"
+# Relacement processes for RV
+globalReplacementMap["tth_th_analysis"]['procRVMap'] = od()
+
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_lep_1"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_lep_2"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_lep_3"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_lep_4"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_1"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_2"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_3"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_4"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_5"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_had_1"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_had_2"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_had_1"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_had_2"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_had_3"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["tH_had_4"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_had_3"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_had_4"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["bkg_had"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["ttH_lep_3"] = "tth_incl"
+globalReplacementMap["tth_th_analysis"]["procRVMap"]["bkg_lep"] = "tth_incl"
+
+# Replacement categories for RV
+globalReplacementMap["tth_th_analysis"]["catRVMap"] = od()
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_lep_1"] = "tH_lep_1"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_lep_2"]  = "tH_lep_2"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_lep_3"]  = "tH_lep_3"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_lep_4"]  = "tH_lep_4"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_1"] = "ttH_lep_1"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_2"]  = "ttH_lep_2"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_3"]  = "ttH_lep_3"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_4"]  = "ttH_lep_4"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_5"]  = "ttH_lep_5"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_had_1"] = "tH_had_1"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_had_2"]  = "tH_had_2"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_had_1"] = "ttH_had_1"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_had_2"]  = "ttH_had_2"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_had_3"] = "tH_had_3"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["tH_had_4"]  = "tH_had_4"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_had_3"] = "ttH_had_3"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_had_4"]  = "ttH_had_4"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["bkg_had"] = "bkg_had"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["ttH_lep_3"] = "ttH_lep_3"
+globalReplacementMap["tth_th_analysis"]["catRVMap"]["bkg_lep"]  = "bkg_lep"
+
+# Guard against new categorisation schemes (extend to 5-7 for tH/ttH had/lep).
+extra_cats = (
+  "tH_lep_5", "tH_lep_6", "tH_lep_7",
+  "ttH_lep_6", "ttH_lep_7",
+  "tH_had_5", "tH_had_6", "tH_had_7",
+  "ttH_had_5", "ttH_had_6", "ttH_had_7",
+)
+for cat in extra_cats:
+  globalReplacementMap["tth_th_analysis"]["procRVMap"][cat] = "tth_incl"
+  globalReplacementMap["tth_th_analysis"]["catRVMap"][cat] = cat
+
+# Fiducial setup: use tth_in replacements (no incl/out in fiducial workspaces)
+globalReplacementMap["tth_th_analysis_fiducial"] = od()
+globalReplacementMap["tth_th_analysis_fiducial"]["procWV"] = "tth_in"
+globalReplacementMap["tth_th_analysis_fiducial"]["catWV"] = globalReplacementMap["tth_th_analysis"]["catWV"]
+globalReplacementMap["tth_th_analysis_fiducial"]["procRVMap"] = od(
+    (key, "tth_in") for key in globalReplacementMap["tth_th_analysis"]["procRVMap"]
+)
+globalReplacementMap["tth_th_analysis_fiducial"]["catRVMap"] = od(
+    globalReplacementMap["tth_th_analysis"]["catRVMap"]
+)
+globalReplacementMap["tth_th_analysis_fiducial_SM_rates"] = od(
+    globalReplacementMap["tth_th_analysis_fiducial"]
+)
+globalReplacementMap["tth_th_analysis_fiducial_noDeco"] = od(
+    globalReplacementMap["tth_th_analysis_fiducial"]
+)
+globalReplacementMap["tth_th_analysis_fiducial_noDeco_SM_rates"] = od(
+    globalReplacementMap["tth_th_analysis_fiducial_SM_rates"]
+)
+
+###################################################################################################################################################################################################
+###################################################################################################################################################################################################
+###################################################################################################################################################################################################
