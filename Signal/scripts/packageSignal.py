@@ -5,12 +5,15 @@ import os, re, sys
 import glob
 import ROOT
 from optparse import OptionParser
+from commonObjects import *
 
 def get_options():
   parser = OptionParser()
   parser.add_option("--cat", dest='cat', default='RECO_0J_PTH_0_10_Tag0', help="RECO category to package")
   parser.add_option("--exts", dest='exts', default='', help="Comma separate list of extensions")
   parser.add_option("--outputExt", dest='outputExt', default='packaged', help="Output extension")
+  parser.add_option("--inputDir", dest='inputDir', default=swd__, help="Input directory containing outdir_<ext>/signalFit/output")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--massPoints", dest='massPoints', default='120,125,130', help="Comma separated list of mass points")
   parser.add_option("--mergeYears", dest='mergeYears', default=False, action="store_true", help="Merge specified categories across years")
   parser.add_option("--year", dest="year", default="2016", help="If not merging, then specify year for output file name")
@@ -26,30 +29,48 @@ def rooiter(x):
 
 # Extract all files to be merged
 fNames = {}
-for ext in opt.exts.split(","): fNames[ext] = glob.glob("outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_*_%s.root"%(ext,ext,opt.cat))
+input_base = opt.inputDir or swd__
+for ext in opt.exts.split(","):
+  fNames[ext] = glob.glob("%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_*_%s.root"%(input_base,ext,ext,opt.cat))
+  if len(fNames[ext]) == 0:
+    print(" --> [ERROR] No signalFit inputs found for ext=%s cat=%s under %s/outdir_%s/signalFit/output"%(
+      ext, opt.cat, input_base, ext))
+    exit(1)
 
 # Define ouput packaged workspace
 print(" --> Packaging output workspaces")
 packagedWS = ROOT.RooWorkspace("wsig_13TeV","wsig_13TeV")
 packagedWS.imp = getattr(packagedWS,"import")
 
-# Extract merged datasets
+# Extract merged datasets (skip for bkg_had to avoid ROOT 1GB bytecount limit).
 data_merged = {}
 data_merged_names = []
-for mp in opt.massPoints.split(","): 
-  data_merged["m%s"%mp] = ROOT.TFile(fNames[opt.exts.split(",")[0]][0]).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat)).emptyClone("sig_mass_m%s_%s"%(mp,opt.cat))
-  data_merged_names.append( data_merged["m%s"%mp].GetName() )
+skip_merged = (opt.cat == "bkg_had")
+print("\n" + "="*40)
+print(" DEBUG: MERGE BLOCK STATUS")
+print("="*40)
+print(" 1. Current category being processed: ", opt.cat)
+print(" 2. Did it trigger the skip? (skip_merged): ", skip_merged)
+if not skip_merged:
+  print(" 3. Action: Merging datasets together...")
+  for mp in opt.massPoints.split(","):
+    data_merged["m%s"%mp] = ROOT.TFile(fNames[opt.exts.split(",")[0]][0]).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat)).emptyClone("sig_mass_m%s_%s"%(mp,opt.cat))
+    data_merged_names.append(data_merged["m%s"%mp].GetName())
+    print("    -> Added to merge list: ", data_merged["m%s"%mp].GetName())
+  else:
+   print(" 3. Action: Skipping merge block entirely (List remains empty!)")
+  print(" 4. Final list of merged dataset names: ", data_merged_names)
+  print("="*40 + "\n")
+  for ext, fNames_by_ext in fNames.items():
+    for fName in fNames_by_ext:
+      for mp in opt.massPoints.split(","):
+        d = ROOT.TFile(fName).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat))
+        for i in range(d.numEntries()):
+          p = d.get(i)
+          w = d.weight()
+          data_merged["m%s"%mp].add(p,w)
 
-for ext, fNames_by_ext in fNames.items():
-  for fName in fNames_by_ext:
-    for mp in opt.massPoints.split(","):
-      d = ROOT.TFile(fName).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat))
-      for i in range(d.numEntries()):
-        p = d.get(i)
-        w = d.weight()
-        data_merged["m%s"%mp].add(p,w)
-  
-for _data in data_merged.values(): packagedWS.imp(_data)
+  for _data in data_merged.values(): packagedWS.imp(_data)
         
 # Loop over input signal fit workspaces
 for ext, fNames_by_ext in fNames.items():
@@ -74,13 +95,27 @@ for ext, fNames_by_ext in fNames.items():
       else: packagedWS.imp(_data)
 
 # Save to file
-if not os.path.isdir("outdir_%s"%opt.outputExt): os.system("mkdir outdir_%s"%opt.outputExt)
-if opt.mergeYears:
-  print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat))
-  f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat),"RECREATE")
+if opt.outputDir == swd__:
+  if not os.path.isdir("outdir_%s"%opt.outputExt): os.system("mkdir outdir_%s"%opt.outputExt)
+  if opt.mergeYears:
+    print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat))
+    f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat),"RECREATE")
+  else:
+    print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year))
+    f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year),"RECREATE")
 else:
-  print(" --> Writing to: ./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year))
-  f = ROOT.TFile("./outdir_%s/CMS-HGG_sigfit_%s_%s_%s.root"%(opt.outputExt,opt.outputExt,opt.cat,opt.year),"RECREATE")
+  if not os.path.isdir(opt.outputDir): os.system("mkdir -p %s"%opt.outputDir)
+  packaged_suffix = opt.outputExt if opt.outputExt else ""
+  if opt.outputExt == "packaged":
+    packaged_suffix = ""
+  elif packaged_suffix and not packaged_suffix.startswith("_"):
+    packaged_suffix = "_%s"%packaged_suffix
+  if opt.mergeYears:
+    print(" --> Writing to: %s/CMS-HGG_sigfit_packaged%s_%s.root"%(opt.outputDir,packaged_suffix,opt.cat))
+    f = ROOT.TFile("%s/CMS-HGG_sigfit_packaged%s_%s.root"%(opt.outputDir,packaged_suffix,opt.cat),"RECREATE")
+  else:
+    print(" --> Writing to: %s/CMS-HGG_sigfit_packaged%s_%s_%s.root"%(opt.outputDir,packaged_suffix,opt.cat,opt.year))
+    f = ROOT.TFile("%s/CMS-HGG_sigfit_packaged%s_%s_%s.root"%(opt.outputDir,packaged_suffix,opt.cat,opt.year),"RECREATE")
 
 packagedWS.Write()
 f.Close()

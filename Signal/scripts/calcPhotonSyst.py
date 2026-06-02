@@ -27,10 +27,12 @@ def get_options():
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
+  parser.add_option("--outputDir", dest='outputDir', default=swd__, help="Output directory")
   parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
+  parser.add_option("--smearsCorr", dest='smearsCorr', default='', help='Photon shape systematics: smearsCorr')
   parser.add_option("--nBins", dest='nBins', default=80, type='int', help='Number of bins in histograms')
   parser.add_option("--thresholdMean", dest='thresholdMean', default=0.05, type='float', help='Reject mean variations if larger than thresholdMean')
   parser.add_option("--thresholdSigma", dest='thresholdSigma', default=0.5, type='float', help='Reject mean variations if larger than thresholdSigma')
@@ -103,7 +105,7 @@ def getRateVar(_hists):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define dataFrame
 columns_data = ['proc','cat','inputWSFile','nominalDataName']
-for stype in ['scales','scalesCorr','smears']:
+for stype in ['scales','scalesCorr','smears','smearsCorr']:
   systs = getattr( opt, stype )
   for s in systs.split(","):
     if s == '': continue
@@ -116,7 +118,12 @@ data = pd.DataFrame( columns=columns_data )
 for _proc in opt.procs.split(","):
   # Glob M125 filename
   _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
-  _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)
+  # Hard-coded for fiducial inclusve with in/out, should maybe be adjusted
+  if (len(_proc.split("_")) <= 2) and (_proc.split("_")[-1] in ["in", "out"]):
+    _nominalDataName = "%s_%s_125_%s_%s"%(procToData(_proc.split("_")[0]),procToData(_proc.split("_")[-1]),sqrts__,opt.cat)
+  else:
+    _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)
+  #data = data.append({'proc':_proc,'cat':opt.cat,'inputWSFile':_WSFileName,'nominalDataName':_nominalDataName}, ignore_index=True, sort=False)
   data = pd.concat([data,pd.DataFrame([{'proc':_proc,'cat':opt.cat,'inputWSFile':_WSFileName,'nominalDataName':_nominalDataName}])], ignore_index=True, sort=False)
 
 # Loop over rows in dataFrame and open ws
@@ -129,9 +136,10 @@ for ir,r in data.iterrows():
   inputWS = f.Get(inputWSName__)
  
   # Loop over scale and smear systematics
-  for stype in ['scales','scalesCorr','smears']:
+  for stype in ['scales','scalesCorr','smears','smearsCorr']:
     for s in getattr(opt,stype).split(","):
       if s == '': continue
+      # Note: Here was an else statement from JLS, include back in if the code does not run
       sname = "%s%s"%(inputNuisanceExtMap[stype],s)
       #print("    * Systematic = %s (%s)"%(sname,stype))
       hists = getHistograms(inputWS,r['nominalDataName'],sname)
@@ -156,8 +164,8 @@ for ir,r in data.iterrows():
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Output dataFrame as pickle file to be read in by signalFit.py
-if not os.path.isdir("%s/outdir_%s"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s"%(swd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(swd__,opt.ext))
-if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(swd__,opt.ext))
-with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
-print(" --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(swd__,opt.ext,opt.cat))
+if not os.path.isdir("%s/outdir_%s"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s"%(opt.outputDir,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst"%(opt.outputDir,opt.ext))
+if not os.path.isdir("%s/outdir_%s/calcPhotonSyst/pkl"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/calcPhotonSyst/pkl"%(opt.outputDir,opt.ext))
+with open("%s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(opt.outputDir,opt.ext,opt.cat),"wb") as f: pickle.dump(data,f) 
+print(" --> Successfully saved photon systematics as pkl file: %s/outdir_%s/calcPhotonSyst/pkl/%s.pkl"%(opt.outputDir,opt.ext,opt.cat))
