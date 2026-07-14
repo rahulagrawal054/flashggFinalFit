@@ -30,13 +30,18 @@ def addConstantSyst(sd,_syst,options):
     # Loop over years and set value for each year
     for year in options.years.split(","):
       mask = (sd['type']=='sig')&(~sd['cat'].str.contains("NOTAG"))&(sd['year']==year)
-      sd.loc[mask,_syst['name']] = _syst['value'][year]
+      if year in _syst['value']:
+        sd.loc[mask,_syst['name']] = _syst['value'][year]
+      else:
+        # Leave as '-' for years not covered by this partial-correlation component
+        continue
 
   # If not correlate across years then create separate columns for each year and fill separately
   else:
     for year in options.years.split(","):
       sd["%s_%s"%(_syst['name'],year)] = '-'
-      sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
+      if year in _syst['value']:
+        sd.loc[(sd['type']=='sig')&(sd['year']==year)&(~sd['cat'].str.contains("NOTAG")), "%s_%s"%(_syst['name'],year)] = _syst['value'][year]
 
   return sd
 
@@ -47,10 +52,16 @@ def getValueFromJson(row,uncertainties,sname):
   p = re.sub("_2018_%s"%decayMode,"",p)
   p = re.sub("_2022preEE_%s"%decayMode,"",p)
   p = re.sub("_2022postEE_%s"%decayMode,"",p)
-  if p in uncertainties: 
-    if type(uncertainties[p][sname])==list: return uncertainties[p][sname]
-    else: return [uncertainties[p][sname]]
-  else: return '-'
+  if p in uncertainties:
+    # If the proc is known but the systematic is not defined for it, skip it
+    if sname not in uncertainties[p]:
+      return '-'
+    if type(uncertainties[p][sname])==list:
+      return uncertainties[p][sname]
+    else:
+      return [uncertainties[p][sname]]
+  else:
+    return '-'
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to return type of systematic: to be used by factory functions
@@ -60,7 +71,10 @@ def getValueFromJson(row,uncertainties,sname):
 def factoryType(d,s):
 
   #Fix for pdfWeight (as Nweights > 10)
-  if('weight_LHEPd' in s['name']): return "s_w"
+  # HiggsDNA: pdfWeight to weight_LHEPd
+  weight_name = s.get('weight_name', s['name'])
+  if('weight_LHEPd' in weight_name): return "s_w"
+  #if('pdfWeight' in s['name'])|('alphaSWeight' in s['name']): return "s_w"
 
   # Loop over rows in dataframe: until syst is found
   for ir, r in d[d['type']=='sig'].iterrows():
@@ -70,14 +84,26 @@ def factoryType(d,s):
     dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
 
     # Check if syst is var (i.e. weight) in workspace
-    if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
-      nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
+    # Prefer exact Up/Down matches to avoid prefix collisions (e.g. hf vs hfstats)
+    has_up = ws.allVars().selectByName(f"{weight_name}Up").getSize()
+    has_down = ws.allVars().selectByName(f"{weight_name}Down").getSize()
+    if has_up or has_down:
+      ws.Delete()
+      f.Close()
+      if has_up and has_down:
+        return "a_w"
+      # If only a single variation exists, treat as symmetric weight
+      return "s_w"
+
+    if ws.allVars().selectByName("%s*"%(weight_name)).getSize():
+      nWeights = ws.allVars().selectByName("%s*"%(weight_name)).getSize()
       ws.Delete()
       f.Close()
       if nWeights == 2: return "a_w"
       elif nWeights == 1: return "s_w"
       else:
         print(" --> [ERROR] systematic %s: > 2 weights in workspace. Leaving..."%s['name'])
+        print("We found nWeights: %s"%nWeights)
         sys.exit(1)
 
     # Check if RooDataHist exists for syst
@@ -92,12 +118,12 @@ def factoryType(d,s):
       f.Close()
 
   # If never found:
-  print(" --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..."%s)
+  print(" --> [ERROR] systematic %s: cannot extract type in factoryType function. Doesn't match requirement for (anti)-symmetric weights or anti-symmetric histograms. Leaving..." %s)
   sys.exit(1)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extract yield variations for signal row in dataFrame
-def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTypes,skipCOWCorr=True,proc="ggH",year='2016',systWeightScheme="accEff",ignoreWarnings=False):
+def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTypes,skipCOWCorr=True,proc="ggH",year='2016',systWeightScheme="accEff",ignoreWarnings=False,systWeightNames=None,systProcMatch=None):
 
   errMessage = "WARNING" if ignoreWarnings else "ERROR"
   errString = "Using nominal yield" if ignoreWarnings else ""
@@ -118,26 +144,44 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
   # For systematics stored as weights (a_w,s_w) in nominal RooDataSets
   # Extract nominal dataset
   data_nominal = _inputWS.data(_nominalDataName)
-  if not data_nominal or data_nominal.numEntries() == 0:
-      print(f"[INFO] Dataset ({_nominalDataName}) not found in workspace for ({proc}, {year}). Setting all yields to 0.")
-      systYields["numEvents"] = 0
-      for s in _systFactoryTypes.keys():
-          systYields[s] = 0
-      return systYields
   # CHECK: is weight in contents: if not then add syst to systToSkip container + print warning
   systToSkip = []
+  # Skip systematics that are not intended for this process
+  procSkip = set()
+  if systProcMatch:
+    import re as _re
+    for s in _systFactoryTypes.keys():
+      pat = systProcMatch.get(s)
+      if pat and (_re.search(pat, proc) is None):
+        procSkip.add(s)
   for s,f in _systFactoryTypes.items():
-    if f == "a_h": continue
-    elif f == "a_w":
-      if( "%sUp"%s not in _nominalDataContents )|( "%sDown"%s not in _nominalDataContents ):
+    if f == "a_h":
+      continue
+    weight_name = systWeightNames.get(s, s) if systWeightNames else s
+    if s in procSkip:
+      systToSkip.append(s)
+      continue
+    if f == "a_w":
+      # Adapting to HiggsDNA output conventions, we have just "Up", 01sigma is missing
+      if ("%sUp" % weight_name not in _nominalDataContents) or ("%sDown" % weight_name not in _nominalDataContents):
         systToSkip.append(s)
         print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
-        if not ignoreWarnings: sys.exit(1) 
-    else:
-      if s not in _nominalDataContents:
+        if not ignoreWarnings:
+          sys.exit(1)
+      # Do not require a nominal weight branch named exactly as the systematic.
+      # HiggsDNA stores only the Up/Down weights plus a shared weight_central.
+    elif f == "s_w":
+      # For symmetric weights, ensure the mapped weight name exists
+      if weight_name not in _nominalDataContents:
         systToSkip.append(s)
         print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
-        if not ignoreWarnings: sys.exit(1)
+        if not ignoreWarnings:
+          sys.exit(1)
+ 
+  if data_nominal.numEntries() < 100:
+    print(" [WARNING] Less than 100 events in considered bin. Those variations will be excluded.")
+
+  systYields["numEvents"] = data_nominal.numEntries()
 
   # Loop over events and extract reweighted yields
   for i in range(0,data_nominal.numEntries()):
@@ -147,6 +191,7 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
     f_NNLOPS = abs(p.getRealValue("NNLOPSweight")) if "NNLOPSweight" in _nominalDataContents else 1.
     # Loop over systematics:
     for s, f in _systFactoryTypes.items(): 
+      weight_name = systWeightNames.get(s, s) if systWeightNames else s
 
       if f == "a_h": continue
 
@@ -162,6 +207,7 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
               systYields["%s_down_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
 
         else:
+          #centralWeightStr = "centralObjectWeight"
           centralWeightStr = "weight_central"
           # Careful, f_central is actually not used here at the moment
           # Do not set it to "weight" since then he will not find it (it is variable and not in the RooDataSet, setting it to zero and skipping all calculations :/)
@@ -170,7 +216,8 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
           else:
             print("Be careful, the centralWeightStr %s cannot be found in the contents of the nominal tree"%centralWeightStr)
           # Changed and removed 01sigma to account for HiggsDNA conventions
-          f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
+          weight_name = systWeightNames.get(s, s) if systWeightNames else s
+          f_up, f_down = p.getRealValue("%sUp"%weight_name), p.getRealValue("%sDown"%weight_name)
           # Checks:
           # 1) if central weights are zero then skip event
           if f_central == 0: continue
@@ -206,11 +253,16 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
               systYields["%s_COWCorr"%s] += w*(f_NNLOPS/f_COWCorr)
 
         else:
-          if "LHEScal" in s: centralWeightStr = "weight_LHEScal_4"
+          #if "scaleWeight" in s: centralWeightStr = "scaleWeight_0"
+          #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
+          #elif "pdfWeight" in s: centralWeightStr = "pdfWeight_0"
+          # HiggsDNA conventions
+          if "LHEScal" in s: centralWeightStr = "weight_LHEScal_4" # accurate for v13
+          #elif "alphaSWeight" in s: centralWeightStr = "scaleWeight_0" 
           elif "LHEPd" in s: centralWeightStr = "weight_LHEPd_0"
-          else: centralWeightStr = "weight_central"
+          else: centralWeightStr = "centralObjectWeight"
           f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
-          f = p.getRealValue(s)
+          f = p.getRealValue(weight_name)
           # Checks:
           # 1) if both central weight and shifted weight are 0 then add nominal weight
           if( f_central == 0 )&( f == 0 ):
@@ -288,7 +340,6 @@ def experimentalSystFactory(d,systs,ftype,options,_removal=False):
       if f in ['a_h','a_w']: 
         for direction in ['up','down']: d.drop(['%s_%s_yield'%(s['name'],direction)], axis=1, inplace=True)
       else: d.drop(['%s_yield'%s['name']], axis=1, inplace=True)
-
   return d
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -309,9 +360,8 @@ def theorySystFactory(d,systs,ftype,options,stxsMergeScheme=None,_removal=False)
         if f in ['a_w','a_h']: 
           for direction in ['up','down']: 
             d.loc[mask,'proc_s0_%s_%s_yield'%(s['name'],direction)] = d[mask]['%s_%s_yield%s'%(s['name'],direction,corrExt)].sum()
-        else:
+        else: 
           d.loc[mask,'proc_s0_%s_yield'%s['name']] = d[mask]['%s_yield%s'%(s['name'],corrExt)].sum()
-
   # Calculate the per-STXS bin (per-year already in proc name) yield variations: add as column in dataFrame
   for proc in d[d['type']=='sig'].proc.unique():
     mask = (d['proc']==proc)

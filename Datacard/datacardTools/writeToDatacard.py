@@ -1,5 +1,5 @@
 # Hold defs of writing functions for datacard
-import os, sys, re
+import os, sys, re, math, numbers
 from commonTools import *
 from commonObjects import *
 
@@ -21,11 +21,29 @@ def writeProcesses(f,d,options):
   # d = Pandas DataFrame
   # Shapes
   # Loop over categories in dataframe
+  years = list(set([re.search(r'\d{4}', item).group() for item in options.years.split(",") if re.search(r'\d{4}', item)]))
   for cat in d.cat.unique():
-    # Loop over rows for respective category
-    for ir,r in d[d['cat']==cat].iterrows():
-      # Write to datacard
-      f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
+    for year in years:
+      # Loop over rows for respective category
+      for ir,r in d[d['cat']==cat].iterrows():
+        if (not (str(year) in r["year"])) and (not (r["year"] == "merged")): continue
+        # Write to datacard
+        # if r['proc'] == "bkg_mass":
+        #   index = r['model'].rfind("_13TeV_bkgshape")
+        #   if index != -1:
+        #     model = r['model'][:index] + "_" + year + "_13TeV_bkgshape"
+        #     f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],model))
+#####
+        if r['proc'] == "bkg_mass":
+          # strip out the era (_year_) tag for background → use only CMS_hgg_<cat>_13TeV_bkgshape
+          index = r['model'].rfind("_13TeV_bkgshape")
+          if index != -1:
+            model = r['model'][:index] + "_13TeV_bkgshape"
+            f.write("shapes      %-55s %-40s %s %s\n"
+                    % (r['proc'], r['cat'], r['modelWSFile'], model))
+#####
+        else: 
+          f.write("shapes      %-55s %-40s %s %s\n"%(r['proc'],r['cat'],r['modelWSFile'],r['model']))
 
   # Bin, observation and rate lines
   lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
@@ -59,6 +77,102 @@ def writeProcesses(f,d,options):
     
   f.write("\n")
   return True
+
+def writeProcesses(f, d, options):
+    import re
+    f.write("\n")
+    # If opt.prune then remove all rows from dataFrame with prune=1
+    if options.prune:
+        d = d[d['prune'] == 0]
+
+    # Remember which categories we've already written data_obs and bkg_mass for
+    written_dataobs = set()
+    written_bkg     = set()
+
+    # Shapes
+    years = list(set([
+        re.search(r'\d{4}', item).group()
+        for item in options.years.split(",")
+        if re.search(r'\d{4}', item)
+    ]))
+
+    for cat in d.cat.unique():
+        for year in years:
+            for _, r in d[d['cat'] == cat].iterrows():
+                # only write rows matching this year (or 'merged')
+                if (str(year) not in r["year"]) and (r["year"] != "merged"):
+                    continue
+
+                proc = r['proc']
+
+                # data_obs: write exactly once per category
+                if proc == "data_obs":
+                    if cat in written_dataobs:
+                        continue
+                    written_dataobs.add(cat)
+                    f.write(
+                        "shapes      %-55s %-40s %s %s\n"
+                        % (proc, cat, r['modelWSFile'], r['model'])
+                    )
+                    continue
+
+                # bkg_mass: write exactly once per category, stripping the era tag
+                if proc == "bkg_mass":
+                    if cat in written_bkg:
+                        continue
+                    written_bkg.add(cat)
+                    idx = r['model'].rfind("_13TeV_bkgshape")
+                    if idx != -1:
+                        model = r['model'][:idx] + "_13TeV_bkgshape"
+                    else:
+                        model = r['model']
+                    f.write(
+                        "shapes      %-55s %-40s %s %s\n"
+                        % (proc, cat, r['modelWSFile'], model)
+                    )
+                    continue
+
+                # all other processes
+                f.write(
+                    "shapes      %-55s %-40s %s %s\n"
+                    % (proc, cat, r['modelWSFile'], r['model'])
+                )
+
+    # Now the bin / observation / rate table
+    lbreak        = "-" * 130
+    lbin_cat      = "%-30s" % "bin"
+    lobs_cat      = "%-30s" % "observation"
+    lbin_procXcat = "%-30s" % "bin"
+    lproc         = "%-30s" % "process"
+    lprocid       = "%-30s" % "process"
+    lrate         = "%-30s" % "rate"
+
+    for cat in d.cat.unique():
+        lbin_cat += "%-55s " % cat
+        lobs_cat += "%-55s " % "-1"
+        sigID = 0
+        for _, r in d[d['cat'] == cat].iterrows():
+            if r['proc'] == "data_obs":
+                continue
+            lbin_procXcat += "%-55s " % cat
+            lproc         += "%-55s " % r['proc']
+            if r['proc'] == "bkg_mass":
+                lprocid += "%-55s " % "1"
+            else:
+                lprocid += "%-55s " % sigID
+                sigID   -= 1
+            if r['rate'] == 1.0:
+                lrate += "%-55.1f " % r['rate']
+            else:
+                lrate += "%-55.7f " % r['rate']
+
+    f.write("\n")
+    for line in [lbreak, lbin_cat, lobs_cat, lbreak,
+                 lbin_procXcat, lproc, lprocid, lrate, lbreak]:
+        f.write(line.rstrip() + "\n")
+
+    f.write("\n")
+    return True
 
 
 def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
@@ -115,13 +229,39 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
             if r['proc'] == "data_obs": continue
             # Extract value and add to line (with checks)
             sval = r["%s%s%s"%(s['name'],mergeStr,tierStr)]
-            lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+            nval = r['numEvents']
+            # Pool Higgs+heavy-flavor systematics across eras (per proc+category)
+            pool_syst_names = {
+              'weight_Higgs_plus_b_syst_ggH',
+              'weight_Higgs_plus_c_syst_ggH',
+              'weight_Higgs_plus_b_syst_vbf',
+              'weight_Higgs_plus_c_syst_vbf',
+              'weight_Higgs_plus_b_syst_VH',
+              'weight_Higgs_plus_c_syst_VH',
+            }
+            pool_min_events = 40
+            if s['name'] in pool_syst_names:
+              pooled_col = f"{s['name']}_pooled"
+              n_pool = r.get('numEvents_pooled', nval)
+              try:
+                n_pool_f = float(n_pool)
+              except Exception:
+                n_pool_f = None
+              if (n_pool_f is not None) and (n_pool_f >= pool_min_events):
+                if pooled_col in r and r[pooled_col] != '-':
+                  sval = r[pooled_col]
+                  nval = n_pool_f
+              else:
+                sval = "-"
+                nval = n_pool_f if n_pool_f is not None else nval
+            lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,nval)
+            # code.interact(local=locals())
         # Remove final space from line and add to file
         f.write("%s\n"%lsyst[:-1])
         # For uncorrelated scale weights: not for merged bins
         if options.doSTXSScaleCorrelationScheme:
           if(tier!='mnorm')&("scaleWeight" in s['name']):
-            for ps,psProcs in scaleCorrScheme.items():
+            for ps,psProcs in scaleCorrScheme.iteritems():
               psStr = "_%s"%ps
               stitle = "%s%s%s"%(s['title'],psStr,tierStr)
               lsyst = '%-50s  %-10s    '%(stitle,s['prior'])
@@ -133,12 +273,10 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
                   p = re.sub("_2016_hgg","",r['proc'])
                   p = re.sub("_2017_hgg","",p)
                   p = re.sub("_2018_hgg","",p)
-                  p = re.sub("_2022preEE_hgg","",p)
-                  p = re.sub("_2022postEE_hgg","",p)
                   # Add value if in proc in phase space else -
                   if p in psProcs: sval = r["%s%s"%(s['name'],tierStr)]
                   else: sval = '-'
-                  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+                  lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
               # Remove final space from line and add to file
               f.write("%s\n"%lsyst[:-1])
       else:
@@ -152,48 +290,117 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
               if r['proc'] == "data_obs": continue
               # Extract value and add to line (with checks)
               sval = r[sname]
-              lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+              nval = r['numEvents']
+              # Pool Higgs+heavy-flavor systematics across eras (per proc+category)
+              pool_syst_names = {
+                'weight_Higgs_plus_b_syst_ggH',
+                'weight_Higgs_plus_c_syst_ggH',
+                'weight_Higgs_plus_b_syst_vbf',
+                'weight_Higgs_plus_c_syst_vbf',
+                'weight_Higgs_plus_b_syst_VH',
+                'weight_Higgs_plus_c_syst_VH',
+              }
+              pool_min_events = 40
+              if s['name'] in pool_syst_names:
+                pooled_col = f"{s['name']}_pooled"
+                n_pool = r.get('numEvents_pooled', nval)
+                try:
+                  n_pool_f = float(n_pool)
+                except Exception:
+                  n_pool_f = None
+                if (n_pool_f is not None) and (n_pool_f >= pool_min_events):
+                  if pooled_col in r and r[pooled_col] != '-':
+                    sval = r[pooled_col]
+                    nval = n_pool_f
+                else:
+                  sval = "-"
+                  nval = n_pool_f if n_pool_f is not None else nval
+              lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,nval)
           # Remove final space from line and add to file
           f.write("%s\n"%lsyst[:-1])
   return True
           
 
-def addSyst(l,v,s,p,c):
-  #l-systematic line, v-value, s-systematic title, p-proc, c-cat
+def addSyst(l,v,s,p,c,n):
+  #l-systematic line, v-value, s-systematic title, p-proc, c-cat, n-numEvents
+  minEventNumber = 100
+  # For pooled Higgs+heavy-flavor systematics we already enforce a 40-event
+  # threshold across eras; use the same threshold here to avoid double-pruning.
+  if ("Higgs_plus_b_syst" in s) or ("Higgs_plus_c_syst" in s):
+    minEventNumber = 40
+  # Cap extreme lnN variations to keep pathological weights under control.
+  cap_min = 0.05
+  cap_max = 2.0
+  def _cap_lnN(val):
+    try:
+      v = float(val)
+    except Exception:
+      return val
+    if v < cap_min:
+      print(" --> [WARNING] systematic %s: value %.3f for (%s,%s) capped to %.3f" % (s, v, p, c, cap_min))
+      return cap_min
+    if v > cap_max:
+      print(" --> [WARNING] systematic %s: value %.3f for (%s,%s) capped to %.3f" % (s, v, p, c, cap_max))
+      return cap_max
+    return v
   if type(v) is str: 
     l += "%-15s "%v
+    return l
+  elif isinstance(v, numbers.Real):
+    # Allow numeric values (e.g. constants from JSON) to pass through
+    if math.isnan(v):
+      l += "%-15s "%"-"
+    else:
+      l += "%-15.3f "%v
     return l
   elif type(v) is list: 
     # Symmetric:
     if len(v) == 1: 
       # Check 1: variation is non-negligible. If not then skip
       if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
-      # Check 2: variation is not negative. Print message and add - to datacard (cleaned later)
-      elif v[0] < 0.: 
-        print(" --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c))
+      # If number of events smaller than minEventNumber add - to datacard
+      elif (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
+      # Check 2: variation is not non-positive. Print message and add - to datacard (cleaned later)
+      elif v[0] <= 0.: 
+        print(" --> [WARNING] systematic %s: non-positive variation for (%s,%s)"%(s,p,c))
         #vstr = "%s"%v[0]
         vstr = "-"
-        l += "%-15s "%v[0]
+        # l += "%-15s "%v[0] # After discussion on the 10.04.24
+        l += "%-15s "%vstr
       else:
-        l += "%-15.3f "%v[0]
+        v0 = _cap_lnN(v[0])
+        l += "%-15.3f "%v0
     # Anti-symmetirc
     if len(v) == 2:
       # Check 1: variation is non-negligible. If not then skip
       if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
-      # Check 2: neither variation is negative. Print message and add - to datacard (cleaned later)
-      elif(v[0]<0.)|(v[1]<0.):
-        print(" --> [WARNING] systematic %s: negative variation for (%s,%s)"%(s,p,c))
-        #vstr = "%.3f/%.3f"%(v[0],v[1])
-        vstr = "-"
+      # If number of events smaller than minEventNumber add - to datacard
+      elif (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
+      # Check 2: neither variation is non-positive. If one side is non-positive,
+      # mirror the other side to keep a symmetric lnN instead of dropping it.
+      elif(v[0] <= 0.)|(v[1] <= 0.):
+        # If any side is non-positive, clamp to the allowed range directly
+        v0, v1 = cap_min, cap_max
+        print(" --> [WARNING] systematic %s: non-positive variation for (%s,%s) -> capped to %.3f/%.3f" % (s, p, c, v0, v1))
+        vstr = "%.3f/%.3f"%(v0,v1)
         l += "%-15s "%vstr
       # Check 3: effect is approximately symmetric: then just add single up variation
-      elif( abs((v[0]*v[1])-1)<0.0005 ): l += "%-15.3f "%v[1]
+      elif( abs((v[0]*v[1])-1)<0.0005 ):
+        v1 = _cap_lnN(v[1])
+        l += "%-15.3f "%v1
       else: 
-        vstr = "%.3f/%.3f"%(v[0],v[1])
-        l += "%-15s "%vstr
+        if (n < minEventNumber) and (not ('lumi' in s)): 
+          l += "%-15s "%"-"
+        else:
+          v0 = _cap_lnN(v[0])
+          v1 = _cap_lnN(v[1])
+          vstr = "%.3f/%.3f"%(v0,v1)
+          if s == "CMS_hgg_SigmaEOverEShift":
+            print(vstr, p, c, n)
+          l += "%-15s "%vstr
     return l
   else:
-    print(" --> [ERROR] systematic %s: value does not have type string or list for (%s,%s). Leaving..."%(s['title'],p,c))
+    print(" --> [ERROR] systematic %s: value does not have type string or list for (%s,%s). Leaving..."%(s,p,c))
     sys.exit(1)
 
 def writeMCStatUncertainty(f,d,options):
@@ -219,26 +426,47 @@ def writeMCStatUncertainty(f,d,options):
       for cat in d.cat.unique():
         for ir,r in d[d['cat']==cat].iterrows():
           if r['proc'] == "data_obs": continue
-          elif r['type'] == "sig": 
-            sval = scval if cat == scat else '-'
-          else:
-            sval = '-'
+          # if r['type'] != "sig": continue
+          if (not (year in r['proc'])) or (r['proc'] == "bkg_mass"): 
+            # Do not assign the MC uncertainty to procs not matching the year/era and to the data
+            lsyst += "%-15s "%"-"
+            continue
+          sval = scval if cat == scat else '-'
           # Extract value and add to line (with checks)
-          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat)
+          lsyst = addSyst(lsyst,sval,stitle,r['proc'],cat,r['numEvents'])
       # Remove final space from line and add to file
       f.write("%s\n"%lsyst[:-1])
   
   return True
 
 
-def writePdfIndex(f,d,options):
-  f.write("\n")
-  for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
-    indexStr = "pdfindex_%s_13TeV"%cat
-    f.write("%-55s  discrete\n"%indexStr)
-  return True
+# def writePdfIndex(f,d,options):
+#   f.write("\n")
+#   years = list(set([re.search(r'\d{4}', item).group() for item in options.years.split(",") if re.search(r'\d{4}', item)]))
+#   for cat in d[~d['cat'].str.contains("NOTAG")].cat.unique(): 
+#     for year in years:
+#       indexStr = "pdfindex_%s_%s_13TeV"%(cat, year)
+#       f.write("%-55s  discrete\n"%indexStr)
+#   return True
+
+def writePdfIndex(f, d, options):
+    """
+    For each non-data category, write exactly one
+    'pdfindex_<cat>_13TeV  discrete' line,
+    dropping any _YEAR tag from the category name.
+    """
+    f.write("\n")
+    # pick out the set of categories that actually appear (ignore your merged data_obs)
+    cats = [c for c in d['cat'].unique() if 'NOTAG' not in c]
+    for cat in cats:
+        # strip any _<year> suffix if present
+        base_cat = re.sub(r'_\d{4}(post|pre)?(EE|BPix)?$', '', cat)
+        indexStr = f"pdfindex_{base_cat}_13TeV"
+        f.write(f"{indexStr:55s}  discrete\n")
+    return True
+
+
 
 def writeBreak(f):
   lbreak = '----------------------------------------------------------------------------------------------------------------------------------'
   f.write("%s\n"%lbreak)
-

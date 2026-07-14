@@ -10,16 +10,31 @@ import glob
 import pickle
 from collections import OrderedDict as od
 from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
+import errno
+
+
+
+# Function to safely create a directory
+def safe_mkdir(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
 def get_options():
   parser = OptionParser()
+  parser.add_option('--inputFiles', default='./', help="Path to the input .pkl file.")
+  parser.add_option('--outputDir', default='./', help="Path to the output directory.")
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
   parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable for variable-specific systematics (if applicable).')
   # For pruning processes
   parser.add_option('--prune', dest='prune', default=False, action="store_true", help="Prune proc x cat which make up less than pruneThreshold (default 0.1%) of given total category")
   parser.add_option('--pruneThreshold', dest='pruneThreshold', default=0.001, type='float', help="Threshold with which to prune proc x cat as fraction of total category yield (default=0.1%)")
-  parser.add_option('--mass', dest='mass', default='125', help="MH mass: required for pruning")
-  parser.add_option('--analysis', dest='analysis', default='tutorial', help="Analysis extension: required for pruning (see ./tools/XSBR.py for example)")
+  parser.add_option('--doTrueYield', dest='doTrueYield', default=False, action="store_true", help="For pruning: use true number of expected events for proc x cat i.e. Product(XS,BR,eff*acc,lumi). Use only if NOTAG dataset has been included. If false then will use nominal_yield (i.e. sumEntries)")
+  parser.add_option('--mass', dest='mass', default='125', help="MH mass: required for doTrueYield")
+  parser.add_option('--analysis', dest='analysis', default='STXS', help="Analysis extension: required for doTrueYield (see ./datacardTools/XSBR.py for example)")
   # For yield/systematics:
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance")
   parser.add_option('--doSystematics', dest='doSystematics', default=False, action="store_true", help="Include systematics calculations and add to datacard")
@@ -37,14 +52,15 @@ def leave():
   exit(0)
 
 STXSMergingScheme, STXSScaleCorrelationScheme = None, None
-if opt.doSTXSMerging: from tools.STXS_tools import STXSMergingScheme
-if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorrelationScheme
+if opt.doSTXSMerging: from datacardTools.STXS_tools import STXSMergingScheme
+if opt.doSTXSScaleCorrelationScheme: from datacardTools.STXS_tools import STXSScaleCorrelationScheme
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
 print(" --> Loading per category dataframes into single dataframe")
 extStr = "_%s"%opt.ext if opt.ext != '' else ''
-pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
+pkl_files = glob.glob("%s/yields%s/*.pkl"%(opt.inputFiles,extStr))
+# print("%s/yields%s/*.pkl"%(opt.inputFiles,extStr))
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
@@ -52,10 +68,22 @@ for f_pkl_name in pkl_files:
     df = pickle.load(f_pkl)
     data = pd.concat([data,df], ignore_index=True, axis=0, sort=False)
 
+    # Ensure we always have a numEvents column (fallback to nominal_yield if nothing else)
+    if 'numEvents' not in data.columns:
+        data['numEvents'] = data['nominal_yield']
+    # ---------------------------
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Systematics: use factory function to calculate yield variations
+
+# Make sure every row has a total event count,
+# so that writeSystematic() never KeyErrors on 'numEvents'
+if 'numEvents' not in data.columns:
+    data['numEvents'] = data['nominal_yield']
+
 if opt.doSystematics:
-  from tools.calcSystematics import factoryType, addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics, envelopeSystematics, renameSyst
+  from datacardTools.calcSystematics import factoryType, addConstantSyst, experimentalSystFactory, theorySystFactory, groupSystematics, envelopeSystematics, renameSyst
 
   print(" ..........................................................................................")
 
@@ -79,7 +107,9 @@ if opt.doSystematics:
   # Add constant systematics to dataFrame
   for s in experimental_systematics:
     if s['type'] == 'constant': data = addConstantSyst(data,s,opt)
-  data = experimentalSystFactory(data, experimental_systematics, experimentalFactoryType, opt )
+  
+  experimentalSystematics = experimental_systematics
+  data = experimentalSystFactory(data, experimentalSystematics, experimentalFactoryType, opt )
 
   # Theory:
   print(" --> Adding theory systematics variations to dataFrame")
@@ -89,9 +119,93 @@ if opt.doSystematics:
   # Theory factory: group scale weights after calculation in relevant grouping scheme
   data = theorySystFactory(data, theory_systematics, theoryFactoryType, opt, stxsMergeScheme=STXSMergingScheme)
   #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="scaleWeight", groupings=[[1,2],[3,6],[4,8]], stxsMergeScheme=STXSMergingScheme)
+  # Changed to nanoAOD conventions based on advice by Jon, 22nd of Feb 2024
+  # Group LHE scale weights per production mode (decorrelated between processes)
+  for _tag in ("ggH", "VBF", "VH", "bbH", "ttH", "tHq", "tHW"):
+    data, theory_systematics = groupSystematics(
+      data, theory_systematics, opt,
+      prefix=f"weight_LHEScal_{_tag}",
+      groupings=[[0,8],[1,7],[3,5]],
+      stxsMergeScheme=STXSMergingScheme
+    )
+  #data, theory_systematics = groupSystematics(data, theory_systematics, opt, prefix="alphaSWeight", groupings=[[0,1]], stxsMergeScheme=STXSMergingScheme)
 
   # Rename systematics
   for s in theory_systematics: s['title'] = renameSyst(s['title'],"scaleWeight","scale")
+
+  # Pool low-stat Higgs+heavy-flavor systematics across eras (per process, per category)
+  # Use pooled values later when writing the datacard.
+  pool_syst_names = {
+      'weight_Higgs_plus_b_syst_ggH',
+      'weight_Higgs_plus_c_syst_ggH',
+      'weight_Higgs_plus_b_syst_vbf',
+      'weight_Higgs_plus_c_syst_vbf',
+      'weight_Higgs_plus_b_syst_VH',
+      'weight_Higgs_plus_c_syst_VH',
+  }
+  if pool_syst_names:
+    years_list = opt.years.split(",")
+
+    # Build factory-type map (experimental + theory)
+    pooled_ftype = {}
+    pooled_ftype.update(experimentalFactoryType)
+    pooled_ftype.update(theoryFactoryType)
+
+    # Add helper columns for base proc/cat (strip year tags)
+    data['base_cat'] = data['cat']
+    data['base_proc'] = data['proc']
+    for y in years_list:
+      data['base_cat'] = data['base_cat'].str.replace(f"_{y}$", "", regex=True)
+      data['base_proc'] = data['base_proc'].str.replace(f"_{y}_hgg$", "", regex=True)
+
+    # Pooled event count across eras (per proc, per category)
+    if 'numEvents_pooled' not in data.columns:
+      data['numEvents_pooled'] = '-'
+
+    # Pooled systematic values
+    for sname in pool_syst_names:
+      col = f"{sname}_pooled"
+      if col not in data.columns:
+        data[col] = '-'
+
+    sig_mask = (data['type'] == 'sig')
+    grouped = data[sig_mask].groupby(['base_proc', 'base_cat'])
+    for (bproc, bcat), df in grouped:
+      # Sum nominal + numEvents across eras for this proc+category
+      nom_sum = pd.to_numeric(df['nominal_yield'], errors='coerce').sum()
+      num_sum = pd.to_numeric(df['numEvents'], errors='coerce').sum()
+      mask = sig_mask & (data['base_proc'] == bproc) & (data['base_cat'] == bcat)
+      data.loc[mask, 'numEvents_pooled'] = num_sum
+
+      for sname in pool_syst_names:
+        if sname not in pooled_ftype:
+          continue
+        ftype = pooled_ftype[sname]
+        pooled_val = None
+        if ftype in ['a_w', 'a_h']:
+          up_col = f"{sname}_up_yield"
+          down_col = f"{sname}_down_yield"
+          if up_col in df.columns and down_col in df.columns:
+            up_sum = pd.to_numeric(df[up_col], errors='coerce').sum()
+            down_sum = pd.to_numeric(df[down_col], errors='coerce').sum()
+            if nom_sum and nom_sum > 0:
+              pooled_val = [down_sum / nom_sum, up_sum / nom_sum]
+            else:
+              pooled_val = [1.0, 1.0]
+        else:
+          val_col = f"{sname}_yield"
+          if val_col in df.columns:
+            val_sum = pd.to_numeric(df[val_col], errors='coerce').sum()
+            if nom_sum and nom_sum > 0:
+              pooled_val = [val_sum / nom_sum]
+            else:
+              pooled_val = [1.0]
+
+        if pooled_val is not None:
+          # Assign the same object to all masked rows explicitly
+          idx = data.index[mask]
+          data.loc[mask, f"{sname}_pooled"] = pd.Series([pooled_val] * len(idx), index=idx)
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Pruning: if process contributes less than 0.1% of yield in analysis category then ignore
@@ -99,32 +213,54 @@ if opt.prune:
   print(" ..........................................................................................")
   print(" --> Pruning processes which contribute < %.2f%% of RECO category yield"%(100*opt.pruneThreshold))
   data['prune'] = 0
-  print(" --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)")
-  mask = (data['type']=='sig')
+  if opt.doTrueYield:
+    print(" --> Using the true yield of process for pruning: N = Product(XS,BR,eff*acc,lumi)")
+    mask = (data['type']=='sig')
 
-  # Extract XS*BR using tools.XSBR
-  data['xsbr'] = '-'
-  from tools.XSBR import *
-  XSBR = extractXSBR(data,mass=opt.mass,analysis=opt.analysis)
-  data.loc[mask,'xsbr'] = data[mask].apply(lambda x: XSBR["XS_%s"%x['procOriginal']]*XSBR['BR'], axis=1)
+    # Extract XS*BR using datacardTools.XSBR
+    data['xsbr'] = '-'
+    from datacardTools.XSBR import *
+    XSBR = extractXSBR(data,mass=opt.mass,analysis=opt.analysis)
+    data.loc[mask,'xsbr'] = data[mask].apply(lambda x: XSBR["XS_%s"%x['procOriginal']]*XSBR['BR'], axis=1)
 
-  # Extract eff*acc using total proc yield
-  data['ea'] = '-'
-  # In HiggsDNA the sumw = eff*acc
-  data.loc[mask,'ea'] = data.loc[mask,'nominal_yield']
+    # Extract eff*acc using total proc yield: strictly should include NOTAG
+    data['ea'] = '-'
+    # corrExt = "_COWCorr" if not opt.skipCOWCorr else ''
+    # procYields = od()
+    # for proc in data[mask]['proc'].unique(): procYields[proc] = data[data['proc']==proc]['nominal_yield%s'%corrExt].sum()
+    # data.loc[mask,'ea'] = data[mask].apply(lambda x : 0 if procYields[x['proc']] == 0 else x['nominal_yield']/procYields[x['proc']], axis=1 )
+    
+    # In HiggsDNA the sumw = eff*acc
+    data.loc[mask,'ea'] = data.loc[mask,'nominal_yield']
 
-  # Calculate true yield
-  data.loc[mask,'true_yield'] = data[mask].apply(lambda x: x['xsbr']*x['ea']*x['rate'], axis=1)
+    # Calculate true yield
+    data.loc[mask,'true_yield'] = data[mask].apply(lambda x: x['xsbr']*x['ea']*x['rate'], axis=1)
 
-  # Extract per category tue yields
-  catTrueYields = od()
-  for cat in data.cat.unique(): catTrueYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].true_yield.sum()
+    # Extract per category tue yields
+    catTrueYields = od()
+    for cat in data.cat.unique(): catTrueYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].true_yield.sum()
 
-  # Set prune = 1 if < threshold of total cat yield
-  mask = (data['true_yield']<opt.pruneThreshold*data.apply(lambda x: catTrueYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
-  data.loc[mask,'prune'] = 1
+    # Set prune = 1 if < threshold of total cat yield
+    mask = (data['true_yield']<opt.pruneThreshold*data.apply(lambda x: catTrueYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
+    data.loc[mask,'prune'] = 1
 
-  # Prune NOTAG events if they exist
+  else:
+    print(" --> Using nominal yield of process (sumEntries) for pruning")
+    mask = (data['type']=='sig')
+
+    # Extract per category yields
+    catYields = od()
+    for cat in data.cat.unique():
+      # print("CAT:", cat)
+      # print(data[(data['cat']==cat)&(data['type']=='sig')])
+      catYields[cat] = data[(data['cat']==cat)&(data['type']=='sig')].nominal_yield.sum()
+    
+    # Set prune = 1 if < threshold of total cat yield
+    # mask = (data['nominal_yield']<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
+    mask = (pd.to_numeric(data['nominal_yield'], errors='coerce')<opt.pruneThreshold*data.apply(lambda x: catYields[x['cat']], axis=1))&(data['type']=='sig')&(~data['cat'].str.contains('NOTAG'))
+    data.loc[mask,'prune'] = 1
+
+  # Finally set all NOTAG events to be pruned
   mask = data['cat'].str.contains("NOTAG")
   data.loc[mask,'prune'] = 1
     
@@ -132,15 +268,16 @@ if opt.prune:
 # SAVE DATAFRAME
 if opt.saveDataFrame:
   print(" ..........................................................................................")
-  print(" --> Saving dataFrame: %s.pkl"%opt.output)
-  with open("%s.pkl"%opt.output,"wb") as fD: pickle.dump(data,fD)
+  print(" --> Saving dataFrame: %s/Dataframe/%s.pkl"%(opt.outputDir,opt.output))
+  safe_mkdir("%s/Dataframe/"%(opt.outputDir))
+  with open("%s/Dataframe/%s.pkl"%(opt.outputDir,opt.output),"wb") as fD: pickle.dump(data,fD)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
 print(" ..........................................................................................")
-fdataName = "%s.txt"%opt.output
+fdataName = "%s/%s.txt"%(opt.outputDir,opt.output)
 print(" --> Writing to datacard file: %s"%fdataName)
-from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
+from datacardTools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")
 if not writePreamble(fdata,opt): 
   print(" --> [ERROR] in writing preamble. Leaving...")
@@ -149,6 +286,7 @@ if not writeProcesses(fdata,data,opt):
   print(" --> [ERROR] in writing processes. Leaving...")
   leave()
 if opt.doSystematics:
+  print(" --> Systematics for bins x processes with less than 100 events will be deactivated!")
   for syst in experimental_systematics:
     if not writeSystematic(fdata,data,syst,opt):
       print(" --> [ERROR] in writing systematic %s (experiment). Leaving"%syst['name'])

@@ -7,7 +7,7 @@ from collections import OrderedDict as od
 # Import tools
 from commonTools import *
 from commonObjects import *
-from tools.submissionTools import *
+from datacardTools.submissionTools import *
 
 def get_options():
   parser = OptionParser()
@@ -17,6 +17,8 @@ def get_options():
   parser.add_option('--procs', dest='procs', default='auto', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='test', help='Extension for saving')
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
+  parser.add_option('--outputYieldsDir', dest='outputYieldsDir', default='', help="Write yields directly under this directory (overrides default Datacard/yields layout)")
+  parser.add_option('--variable', dest='variable', default='', help='Considered variable (if any). Necessary to account for the proper systematic uncertainties.')
   parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Merge category across years")
   parser.add_option('--skipBkg', dest='skipBkg', default=False, action="store_true", help="Only add signal processes to datacard")
   parser.add_option('--bkgScaler', dest='bkgScaler', default=1., type="float", help="Add overall scale factor for background")
@@ -25,6 +27,7 @@ def get_options():
   parser.add_option('--bkgModelWSDir', dest='bkgModelWSDir', default='./Models/background', help='Input background model WS directory')
   parser.add_option('--bkgModelExt', dest='bkgModelExt', default='multipdf', help='Extension used when saving background model')
   # For yields calculations:
+  parser.add_option('--doNOTAG', dest='doNOTAG', default=False, action="store_true", help="Include NOTAG dataset: needed for fully correct calculation of theory shape uncertainties (i.e. include out-of-acceptance events)")
   parser.add_option('--skipZeroes', dest='skipZeroes', default=False, action="store_true", help="Skip signal processes with 0 sum of weights")
   parser.add_option('--skipCOWCorr', dest='skipCOWCorr', default=False, action="store_true", help="Skip centralObjectWeight correction for events in acceptance. Use if no centralObjectWeight in workspace")
   parser.add_option('--systWeightScheme', dest='systWeightScheme', default='accEff', choices=['legacyHiggsDNA','accEff'], help="""Choose normalisation scheme for weight systematics.
@@ -44,7 +47,7 @@ def get_options():
 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING YIELDS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 def leave():
   print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ RUNNING YIELDS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-  exit(0)
+  sys.exit(1)
 
 # Store all opts in orderedDict for submissionTools
 options = od()
@@ -53,11 +56,13 @@ options['inputWSDirMap'] = opt.inputWSDirMap
 options['procs'] = opt.procs
 options['ext'] = opt.ext
 options['mass'] = opt.mass
+options['outputYieldsDir'] = opt.outputYieldsDir
 options['sigModelWSDir'] = opt.sigModelWSDir
 options['sigModelExt'] = opt.sigModelExt
 options['bkgModelWSDir'] = opt.bkgModelWSDir
 options['bkgModelExt'] = opt.bkgModelExt
 options['modeOpts'] = ''
+options['variable'] = opt.variable
 if opt.mergeYears:  options['modeOpts'] += ' --mergeYears'
 if opt.skipBkg: options['modeOpts'] += ' --skipBkg'
 if opt.bkgScaler != 1.: options['modeOpts'] += ' --bkgScaler %.4f'%opt.bkgScaler
@@ -76,13 +81,20 @@ inputWSDir0 = options['inputWSDirMap'].split(",")[0].split("=")[1]
 WSFileNames = extractWSFileNames(inputWSDir0)
 if options['cats'] == "auto": options['cats'] = extractListOfCats(WSFileNames)
 
+if( opt.doNOTAG )&( 'NOTAG' not in options['cats'] ):
+  if( containsNOTAG(WSFileNames) ): options['cats'] += ',NOTAG'
+  else:
+    print(" --> [WARNING] NOTAG dataset not present in input workspace. Skipping NOTAG")
+
 options['nCats'] = len(options['cats'].split(","))
 
 print(" --> Running yields for following cats: %s"%options['cats'])
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Make directory to store job scripts and output
-if not os.path.isdir("%s/yields_%s"%(dwd__,options['ext'])): os.system("mkdir %s/yields_%s"%(dwd__,options['ext']))
+yields_base_dir = options['outputYieldsDir'] if options['outputYieldsDir'] else dwd__
+if not os.path.isdir("%s/yields_%s"%(yields_base_dir,options['ext'])):
+  os.makedirs("%s/yields_%s"%(yields_base_dir,options['ext']), exist_ok=True)
 
 # Write submission files: style depends on batch system
 writeSubFiles(options)
