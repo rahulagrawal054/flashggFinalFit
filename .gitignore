@@ -37,3 +37,49 @@ AutoDict_*
 # Output dirs in signal and bkg
 Signal/outdir_*
 Background/outdir_*
+
+# Additional generated images and build products
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.eps
+*.so
+*.a
+__pycache__/
+/Background/RootDict.cxx
+/Background/bin/
+/Background/lib/
+
+# Archived background and bias-study outputs
+/Background/GMM_old/
+/Background/OLD_OUTDIR/
+/Combine/Checks/Bias_in_significance/old/
+/Combine/Checks/Bias_in_significance/*200toys/
+/Combine/Checks/Bias_in_significance/toy_success_summary.csv
+/Combine/Checks/Bias_nominal/old/
+/Combine/Checks/Bias_nominal/GMM_Category/**/*_mu[0-9]*/
+
+# Generated fit results, job wrappers, and yield tables
+/Combine/DCB_0p001/Impacts_*/
+/Combine/SoG_0p001/Impacts_*/
+/Combine/prune_scan_Strategy0/0p*/**/*.csv
+/Combine/prune_scan_Strategy0/0p*/**/*.json
+/Combine/prune_scan_Strategy0/pruning_summary_output/
+/Combine/t2w_jobs/
+/Combine/yield_table*.tex
+/Datacard/yields/
+/Datacard/yields_backup/
+/Plots/SplusBModelsfiducial_toys_local/
+
+# Generated slide artifacts and signal tables
+*.aux
+*.nav
+*.snm
+*.toc
+*.fls
+*.fdb_latexmk
+/Signal/DCB_vs_SoG_signal_model_comparison.tex
+/Signal/make_signal_slides/output/
+/Signal/make_signal_slides/signal_comparison_output/
+/Signal/tables/
