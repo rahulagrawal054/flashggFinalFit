@@ -165,9 +165,10 @@ if opts.toys:
             toyCmd = (
                 "combine -m %.4f -d %s -M GenerateOnly -s %d --saveToys --toysNoSystematics "
                 "-t %d -n _%s_ttH%g "
+                "--setParameterRanges r_ttH=%g,%g "
                 "--setParameters %s=%d,r_ttH=%g --freezeParameters %s"
                 % (opts.mH, opts.datacard, opts.seed, opts.nToys, name, truth,
-                   indexName, ipdf, truth, indexName)
+                   opts.rMin, opts.rMax, indexName, ipdf, truth, indexName)
             )
             ok = run(toyCmd, tag, dry=opts.dryRun)
             if not opts.dryRun and ok:
@@ -218,17 +219,20 @@ if opts.plots:
 
             pullEntries, failedToys = 0, 0
             for itoy in range(opts.nToys):
-                tree.GetEntry(3 * itoy)
+                if tree.GetEntry(3 * itoy) <= 0:
+                    failedToys += 1; continue
                 if not getattr(tree, 'quantileExpected') == -1:
                     failedToys += 1; continue
                 bf = getattr(tree, 'r_ttH')
 
-                tree.GetEntry(3 * itoy + 1)
+                if tree.GetEntry(3 * itoy + 1) <= 0:
+                    failedToys += 1; continue
                 if not abs(getattr(tree, 'quantileExpected') - (-0.32)) < 0.001:
                     failedToys += 1; continue
                 lo = getattr(tree, 'r_ttH')
 
-                tree.GetEntry(3 * itoy + 2)
+                if tree.GetEntry(3 * itoy + 2) <= 0:
+                    failedToys += 1; continue
                 if not abs(getattr(tree, 'quantileExpected') - 0.32) < 0.001:
                     failedToys += 1; continue
                 hi = getattr(tree, 'r_ttH')
