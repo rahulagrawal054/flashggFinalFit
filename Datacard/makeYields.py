@@ -117,7 +117,8 @@ for year in years:
       f = ROOT.TFile(_inputWSFile)
       w = f.Get(inputWSName__)
       sumw = w.data(_nominalDataName).sumEntries()
-      if sumw == 0.: skipProc = True
+      #if sumw == 0.: skipProc = True
+      if sumw <=1e-9: skipProc = True
       w.Delete()
       f.Close()
     if skipProc: continue

@@ -1,24 +1,714 @@
 models = {
-  "mu_inclusive":"",
+"r_2D":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
 
-  "mu_ggH_VBF":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
---PO \"map=.*/ggH.*:r_ggH[1,0,3]\" \
---PO \"map=.*/qqH.*:r_VBF[1,0,5]\"",
+"r_1D_ttH_fixedtHq":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_in.*:1" \
+    --PO "map=.*/tHqHad_in.*:1" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLep_out.*:1" \
+    --PO "map=.*/tHqHad_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHW_out.*:1"
+""",
 
-  "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
---PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
---PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \
---PO \"map=.*/qqH.*:r_VBF[1,0,3]\" \
---PO \"map=.*/WH_had.*:r_VH[1,0,3]\" \
---PO \"map=.*/ZH_had.*:r_VH[1,0,3]\" \
---PO \"map=.*/ggZH_had.*:r_VH[1,0,3]\" \
---PO \"map=.*/WH_lep.*:r_VH[1,0,3]\" \
---PO \"map=.*/ZH_lep.*:r_VH[1,0,3]\" \
---PO \"map=.*/ggZH_ll.*:r_VH[1,0,3]\" \
---PO \"map=.*/ggZH_nunu.*:r_VH[1,0,3]\" \
---PO \"map=.*/ttH.*:r_top[1,0,3]\" \
---PO \"map=.*/tHq.*:r_top[1,0,3]\" \
---PO \"map=.*/tHW.*:r_top[1,0,3]\"",
+"r_2D_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLep_out.*:1" \
+    --PO "map=.*/tHqHad_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHW_out.*:1"
+""",
+"r_tHq_1D":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLep_incl.*:r_tHq[1,-25,25]" \
+     --PO "map=.*/tHqHad_incl.*:r_tHq[1,-25,25]" \
+     --PO "map=.*/tth_incl.*:1" \
+     --PO "map=.*/tHW_incl.*:1" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_tHq_1D_fiducial":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLep_in.*:r_tHq[1,-25,25]" \
+     --PO "map=.*/tHqHad_in.*:r_tHq[1,-25,25]" \
+     --PO "map=.*/tth_in.*:1" \
+     --PO "map=.*/tHW_in.*:1" \
+     --PO "map=.*/ggh_in.*:1" \
+     --PO "map=.*/bbH_in.*:1" \
+     --PO "map=.*/vbf_in.*:1" \
+     --PO "map=.*/vh_in.*:1" \
+     --PO "map=.*/tHqLep_out.*:1" \
+     --PO "map=.*/tHqHad_out.*:1" \
+     --PO "map=.*/tth_out.*:1" \
+     --PO "map=.*/tHW_out.*:1" \
+     --PO "map=.*/ggh_out.*:1" \
+     --PO "map=.*/bbH_out.*:1" \
+     --PO "map=.*/vbf_out.*:1" \
+     --PO "map=.*/vh_out.*:1"
+     """,
+
+"r_tHq_1D_ttH_profiled":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_tHq_1D_ttH_profiled_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/bbH_in.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/tHqLep_out.*:1" \
+    --PO "map=.*/tHqHad_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHW_out.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbH_out.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_out.*:1"
+    """,
+
+# the following two are for comparison with previous measurements, where tHW was part of tH
+"r_tHq_plus_tHW_1D":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLep_incl.*:r_tH[1,-25,25]" \
+     --PO "map=.*/tHqHad_incl.*:r_tH[1,-25,25]" \
+     --PO "map=.*/tth_incl.*:1" \
+     --PO "map=.*/tHW_incl.*:r_tH[1,-25,25]" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_tHq_plus_tHW_1D_ttH_profiled":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_incl.*:r_tH[1,-25,25]" \
+    --PO "map=.*/tHqHad_incl.*:r_tH[1,-25,25]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_incl.*:r_tH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_tHq_plus_tHW_1D_ttH_profiled_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_in.*:r_tH[1,-25,25]" \
+    --PO "map=.*/tHqHad_in.*:r_tH[1,-25,25]" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_in.*:r_tH[1,-25,25]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/bbH_in.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/tHqLep_out.*:1" \
+    --PO "map=.*/tHqHad_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHW_out.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbH_out.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_out.*:1"
+    """,
+
+"r_ttH_1D":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLep_incl.*:1" \
+     --PO "map=.*/tHqHad_incl.*:1" \
+     --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/tHW_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_ttH_1D_tHq_profiled":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_ttH_1D_tHq_profiled_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_in.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/bbH_in.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/tHqLep_out.*:1" \
+    --PO "map=.*/tHqHad_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHW_out.*:1"
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbH_out.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_out.*:1"
+    """,
+
+# only one POI for significance? warning: ModelConfig 'ModelConfig' defines more than one parameter of interest. This is not supported in some statistical methods.
+  "Z_ttH": 
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+      --PO "map=.*/tHqLep_incl.*:1" \
+      --PO "map=.*/tHqHad_incl.*:1" \
+      --PO "map=.*/vbf_incl.*:1" \
+      --PO "map=.*/vh_incl.*:1" \
+      --PO "map=.*/ggh_incl.*:1" \
+      --PO "map=.*/bbH_incl.*:1" \
+      --PO "map=.*/tth_incl.*:r_ttH[1,0,5]" \
+      --PO "map=.*/tHW_incl.*:r_ttH[1,0,5]" 
+      """,
+
+  "Z_ttH_fiducial": 
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+      --PO "map=.*/tHqLep_in.*:1" \
+      --PO "map=.*/tHqHad_in.*:1" \
+      --PO "map=.*/vbf_in.*:1" \
+      --PO "map=.*/vh_in.*:1" \
+      --PO "map=.*/ggh_in.*:1" \
+      --PO "map=.*/bbH_in.*:1" \
+      --PO "map=.*/tth_in.*:r_ttH[1,0,5]" \
+      --PO "map=.*/tHW_in.*:r_ttH[1,0,5]"  \
+      --PO "map=.*/tHqLep_out.*:1" \
+      --PO "map=.*/tHqHad_out.*:1" \
+      --PO "map=.*/vbf_out.*:1" \
+      --PO "map=.*/vh_out.*:1" \
+      --PO "map=.*/ggh_out.*:1" \
+      --PO "map=.*/bbH_out.*:1" \
+      --PO "map=.*/tth_out.*:1" \
+      --PO "map=.*/tHW_out.*:1" 
+      """,
+
+  "Z_tHq":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tHqHad_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/tHW_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+  "Z_tHq_plus_tHW":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/tHqHad_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/tHW_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+
+  "Z_tHq_plus_tHW_fiducial":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_in.*:r_tH[1,0,25]" \
+       --PO "map=.*/tHqHad_in.*:r_tH[1,0,25]" \
+       --PO "map=.*/tth_in.*:1" \
+       --PO "map=.*/ggh_in.*:1" \
+       --PO "map=.*/bbH_in.*:1" \
+       --PO "map=.*/tHW_in.*:r_tH[1,0,25]" \
+       --PO "map=.*/vbf_in.*:1" \
+       --PO "map=.*/vh_in.*:1" \
+       --PO "map=.*/tHqLep_out.*:1" \
+       --PO "map=.*/tHqHad_out.*:1" \
+       --PO "map=.*/tth_out.*:1" \
+       --PO "map=.*/ggh_out.*:1" \
+       --PO "map=.*/bbH_out.*:1" \
+       --PO "map=.*/tHW_out.*:1" \
+       --PO "map=.*/vbf_out.*:1" \
+       --PO "map=.*/vh_out.*:1"
+       """,
+
+  "limit_tHq":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tHqHad_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/tHW_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+  "limit_tHq_plus_tHW":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/tHqHad_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/tHW_incl.*:r_tH[1,0,25]" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+  "limit_tHq_plus_tHW_fiducial":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_in.*:r_tH[1,0,25]" \
+       --PO "map=.*/tHqHad_in.*:r_tH[1,0,25]" \
+       --PO "map=.*/tth_in.*:1" \
+       --PO "map=.*/tHW_in.*:1" \
+       --PO "map=.*/ggh_in.*:1" \
+       --PO "map=.*/bbH_in.*:1" \
+       --PO "map=.*/vbf_in.*:1" \
+       --PO "map=.*/vh_in.*:1" \
+       --PO "map=.*/tHqLep_out.*:1" \
+       --PO "map=.*/tHqHad_out.*:1" \
+       --PO "map=.*/tth_out.*:1" \
+       --PO "map=.*/ggh_out.*:1" \
+       --PO "map=.*/bbH_out.*:1" \
+       --PO "map=.*/tHW_out.*:1" \
+       --PO "map=.*/vbf_out.*:1" \
+       --PO "map=.*/vh_out.*:1"
+       """,
+
+
+# used this just for tests
+  "limit_tHq_HybridNew":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLep_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tHqHad_incl.*:r_tHq[1,0,25]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+# --------------------------------------------------------------------------
+# BSM template variants (CP-odd, ktm1) with flattened process names. Will be tested against SM Asimov datasets to study model dependence.
+# --------------------------------------------------------------------------
+
+"r_2D_SM":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHqHad_incl.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHW_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+
+
+
+"r_2D_CPodd":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthCPodd_incl.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHWCPodd_incl.*:r_ttH[1,0,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_CPodd_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepCPodd_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadCPodd_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthCPodd_in.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHWCPodd_in.*:r_ttH[1,0,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepCPodd_out.*:1" \
+    --PO "map=.*/tHqHadCPodd_out.*:1" \
+    --PO "map=.*/tthCPodd_out.*:1" \
+    --PO "map=.*/tHWCPodd_out.*:1"
+""",
+
+"r_2D_Ktm1":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKtm1Ktt0_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tHqHadKtm1Ktt0_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWKtm1Ktt0_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Ktm1Ktt0":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKtm1Ktt0_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tHqHadKtm1Ktt0_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWKtm1Ktt0_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Ktm1Ktt0_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKtm1Ktt0_in.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tHqHadKtm1Ktt0_in.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tth_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWKtm1Ktt0_in.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepKtm1Ktt0_out.*:1" \
+    --PO "map=.*/tHqHadKtm1Ktt0_out.*:1" \
+    --PO "map=.*/tth_out.*:1" \
+    --PO "map=.*/tHWKtm1Ktt0_out.*:1"
+""",
+
+"r_2D_Kt0p7Ktt0p7":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0p7Ktt0p7_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0p7Ktt0p7_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0p7Ktt0p7_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0p7Ktt0p7_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Kt0p7Ktt0p7_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0p7Ktt0p7_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0p7Ktt0p7_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0p7Ktt0p7_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0p7Ktt0p7_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepKt0p7Ktt0p7_out.*:1" \
+    --PO "map=.*/tHqHadKt0p7Ktt0p7_out.*:1" \
+    --PO "map=.*/tthKt0p7Ktt0p7_out.*:1" \
+    --PO "map=.*/tHWKt0p7Ktt0p7_out.*:1"
+""",
+
+"r_2D_Kt0p7Kttm0p7":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0p7Kttm0p7_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0p7Kttm0p7_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0p7Kttm0p7_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0p7Kttm0p7_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Kt0p7Kttm0p7_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0p7Kttm0p7_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0p7Kttm0p7_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0p7Kttm0p7_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0p7Kttm0p7_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepKt0p7Kttm0p7_out.*:1" \
+    --PO "map=.*/tHqHadKt0p7Kttm0p7_out.*:1" \
+    --PO "map=.*/tthKt0p7Kttm0p7_out.*:1" \
+    --PO "map=.*/tHWKt0p7Kttm0p7_out.*:1"
+""",
+
+"r_2D_Kt0Kttm1":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0Kttm1_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0Kttm1_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0Kttm1_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0Kttm1_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Kt0Kttm1_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0Kttm1_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0Kttm1_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0Kttm1_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0Kttm1_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepKt0Kttm1_out.*:1" \
+    --PO "map=.*/tHqHadKt0Kttm1_out.*:1" \
+    --PO "map=.*/tthKt0Kttm1_out.*:1" \
+    --PO "map=.*/tHWKt0Kttm1_out.*:1"
+""",
+
+"r_2D_Kt0Ktt0":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0Ktt0_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0Ktt0_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0Ktt0_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0Ktt0_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+""",
+"r_2D_Kt0Ktt0_fiducial":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKt0Ktt0_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadKt0Ktt0_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthKt0Ktt0_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHWKt0Ktt0_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLepKt0Ktt0_out.*:1" \
+    --PO "map=.*/tHqHadKt0Ktt0_out.*:1" \
+    --PO "map=.*/tthKt0Ktt0_out.*:1" \
+    --PO "map=.*/tHWKt0Ktt0_out.*:1"
+""",
+
+"r_tHq_1D_CPodd":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLepCPodd_incl.*:r_tHq[1,-1,5]" \
+     --PO "map=.*/tHqHadCPodd_incl.*:r_tHq[1,-1,5]" \
+     --PO "map=.*/tthCPodd_incl.*:1" \
+     --PO "map=.*/tHWCPodd_incl.*:1" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_tHq_1D_Ktm1":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLepKtm1_incl.*:r_tHq[1,-1,3]" \
+     --PO "map=.*/tHqHadKtm1_incl.*:r_tHq[1,-1,3]" \
+     --PO "map=.*/tth_incl.*:1" \
+     --PO "map=.*/tHWKtm1_incl.*:1" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_tHq_1D_ttH_profiled_CPodd":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthCPodd_incl.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHWCPodd_incl.*:r_ttH[1,0,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_tHq_1D_ttH_profiled_Ktm1":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKtm1_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tHqHadKtm1_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWKtm1_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_ttH_1D_CPodd":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLepCPodd_incl.*:1" \
+     --PO "map=.*/tHqHadCPodd_incl.*:1" \
+     --PO "map=.*/tthCPodd_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/tHWCPodd_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_ttH_1D_Ktm1":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+     --PO "map=.*/tHqLepKtm1_incl.*:1" \
+     --PO "map=.*/tHqHadKtm1_incl.*:1" \
+     --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/tHWKtm1_incl.*:r_ttH[1,-1,3]" \
+     --PO "map=.*/ggh_incl.*:1" \
+     --PO "map=.*/bbH_incl.*:1" \
+     --PO "map=.*/vbf_incl.*:1" \
+     --PO "map=.*/vh_incl.*:1"
+     """,
+
+"r_ttH_1D_tHq_profiled_CPodd":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHadCPodd_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tthCPodd_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWCPodd_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"r_ttH_1D_tHq_profiled_Ktm1":
+"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLepKtm1_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tHqHadKtm1_incl.*:r_tHq[1,-1,3]" \
+    --PO "map=.*/tth_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/tHWKtm1_incl.*:r_ttH[1,-1,3]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+    """,
+
+"Z_tHq_CPodd":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLepCPodd_incl.*:r_tHq[1,0,5]" \
+       --PO "map=.*/tHqHadCPodd_incl.*:r_tHq[1,0,5]" \
+       --PO "map=.*/tthCPodd_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/tHWCPodd_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+"Z_tHq_Ktm1":
+    """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+       --PO "map=.*/tHqLepKtm1_incl.*:r_tHq[1,0,2.5]" \
+       --PO "map=.*/tHqHadKtm1_incl.*:r_tHq[1,0,2.5]" \
+       --PO "map=.*/tth_incl.*:1" \
+       --PO "map=.*/ggh_incl.*:1" \
+       --PO "map=.*/bbH_incl.*:1" \
+       --PO "map=.*/tHWKtm1_incl.*:1" \
+       --PO "map=.*/vbf_incl.*:1" \
+       --PO "map=.*/vh_incl.*:1"
+       """,
+
+
+
+
+
+
+
+
+
+  "mu_inclusive_wsyst":"",
+
+  "mu_fiducial":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_in.*:r[1,0,2]\" \
+--PO \"map=.*/vbf_in.*:r[1,0,2]\" \
+--PO \"map=.*/vh_in.*:r[1,0,2]\" \
+--PO \"map=.*/tth_in.*:r[1,0,2]\"",
+
+  "mu_fiducial_observed":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+  --PO \"map=.*/ggh_in.*:r[1,0,2]\" \
+  --PO \"map=.*/vbf_in.*:r[1,0,2]\" \
+  --PO \"map=.*/vh_in.*:r[1,0,2]\" \
+  --PO \"map=.*/tth_in.*:r[1,0,2]\"",
+
+#   "mu":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+# --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
+# --PO \"map=.*/bbH.*:r_ggH[1,0,2]\" \
+# --PO \"map=.*/qqH.*:r_VBF[1,0,3]\" \
+# --PO \"map=.*/WH_had.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ZH_had.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ggZH_had.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/WH_lep.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ZH_lep.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ggZH_ll.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ggZH_nunu.*:r_VH[1,0,3]\" \
+# --PO \"map=.*/ttH.*:r_top[1,0,3]\" \
+# --PO \"map=.*/tHq.*:r_top[1,0,3]\" \
+# --PO \"map=.*/tHW.*:r_top[1,0,3]\"",
 
   "stage0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
 --PO \"map=.*/ggH.*:r_ggH[1,0,2]\" \
@@ -244,9 +934,371 @@ models = {
 --PO \"map=.*/tHW.*hgg:r_tH[1,0,15]\"",
 
 
+  "PTH":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_0p0_15p0.*:r_PTH_0p0_15p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_15p0_30p0.*:r_PTH_15p0_30p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_30p0_45p0.*:r_PTH_30p0_45p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_45p0_80p0.*:r_PTH_45p0_80p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_80p0_120p0.*:r_PTH_80p0_120p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_120p0_200p0.*:r_PTH_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_200p0_350p0.*:r_PTH_200p0_350p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTH_350p0_10000p0.*:r_PTH_350p0_10000p0[1,-3,3]\"",
+
+  "rapidity":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_YH_0p0_0p15.*:r_YH_0p0_0p15[1,-3,3]\" \
+--PO \"map=.*/tth_YH_0p0_0p15.*:r_YH_0p0_0p15[1,-3,3]\" \
+--PO \"map=.*/vh_YH_0p0_0p15.*:r_YH_0p0_0p15[1,-3,3]\" \
+--PO \"map=.*/vbf_YH_0p0_0p15.*:r_YH_0p0_0p15[1,-3,3]\" \
+--PO \"map=.*/ggh_YH_0p15_0p3.*:r_YH_0p15_0p3[1,-3,3]\" \
+--PO \"map=.*/tth_YH_0p15_0p3.*:r_YH_0p15_0p3[1,-3,3]\" \
+--PO \"map=.*/vh_YH_0p15_0p3.*:r_YH_0p15_0p3[1,-3,3]\" \
+--PO \"map=.*/vbf_YH_0p15_0p3.*:r_YH_0p15_0p3[1,-3,3]\" \
+--PO \"map=.*/ggh_YH_0p3_0p6.*:r_YH_0p3_0p6[1,-3,3]\" \
+--PO \"map=.*/tth_YH_0p3_0p6.*:r_YH_0p3_0p6[1,-3,3]\" \
+--PO \"map=.*/vh_YH_0p3_0p6.*:r_YH_0p3_0p6[1,-3,3]\" \
+--PO \"map=.*/vbf_YH_0p3_0p6.*:r_YH_0p3_0p6[1,-3,3]\" \
+--PO \"map=.*/ggh_YH_0p6_0p9.*:r_YH_0p6_0p9[1,-3,3]\" \
+--PO \"map=.*/tth_YH_0p6_0p9.*:r_YH_0p6_0p9[1,-3,3]\" \
+--PO \"map=.*/vh_YH_0p6_0p9.*:r_YH_0p6_0p9[1,-3,3]\" \
+--PO \"map=.*/vbf_YH_0p6_0p9.*:r_YH_0p6_0p9[1,-3,3]\" \
+--PO \"map=.*/ggh_YH_0p9_2p5.*:r_YH_0p9_2p5[1,-3,3]\" \
+--PO \"map=.*/tth_YH_0p9_2p5.*:r_YH_0p9_2p5[1,-3,3]\" \
+--PO \"map=.*/vh_YH_0p9_2p5.*:r_YH_0p9_2p5[1,-3,3]\" \
+--PO \"map=.*/vbf_YH_0p9_2p5.*:r_YH_0p9_2p5[1,-3,3]\"",
+
+  "Njets2p5_5bin":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_3p0_4p0.*:r_NJ_3p0_4p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_3p0_4p0.*:r_NJ_3p0_4p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_3p0_4p0.*:r_NJ_3p0_4p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_3p0_4p0.*:r_NJ_3p0_4p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_4p0_100p0.*:r_NJ_4p0_100p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_4p0_100p0.*:r_NJ_4p0_100p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_4p0_100p0.*:r_NJ_4p0_100p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_4p0_100p0.*:r_NJ_4p0_100p0[1,0,3]\"",
+
+  "Njets2p5":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,-3,3]\" \
+--PO \"map=.*/tth_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,-3,3]\" \
+--PO \"map=.*/vh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,-3,3]\" \
+--PO \"map=.*/vbf_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,-3,3]\" \
+--PO \"map=.*/ggh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,-3,3]\" \
+--PO \"map=.*/tth_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,-3,3]\" \
+--PO \"map=.*/vh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,-3,3]\" \
+--PO \"map=.*/vbf_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,-3,3]\" \
+--PO \"map=.*/ggh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,-3,3]\" \
+--PO \"map=.*/tth_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,-3,3]\" \
+--PO \"map=.*/vh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,-3,3]\" \
+--PO \"map=.*/vbf_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,-3,3]\" \
+--PO \"map=.*/ggh_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,-3,3]\" \
+--PO \"map=.*/tth_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,-3,3]\" \
+--PO \"map=.*/vh_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,-3,3]\" \
+--PO \"map=.*/vbf_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,-3,3]\"",
+
+  "Njets2p5_0_3_fine":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_0p0_1p0.*:r_NJ_0p0_1p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_1p0_2p0.*:r_NJ_1p0_2p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_2p0_3p0.*:r_NJ_2p0_3p0[1,0,3]\" \
+--PO \"map=.*/ggh_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,0,3]\" \
+--PO \"map=.*/tth_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,0,3]\" \
+--PO \"map=.*/vh_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,0,3]\" \
+--PO \"map=.*/vbf_NJ_3p0_100p0.*:r_NJ_3p0_100p0[1,0,3]\"",
+
+  "ptJ0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,-3,3]\" \
+--PO \"map=.*/ggh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/tth_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/vh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,-3,3]\" \
+--PO \"map=.*/vbf_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,-3,3]\"",
+
+  "ptJ0_0_3_fine":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_30p0_75p0.*:r_PTJ0_30p0_75p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_75p0_120p0.*:r_PTJ0_75p0_120p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\"",
+
+  "ptJ0_0_30_GeV_0_3_fine":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_30p0_10000p0.*:r_PTJ0_30p0_10000p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_30p0_10000p0.*:r_PTJ0_30p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_30p0_10000p0.*:r_PTJ0_30p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_30p0_10000p0.*:r_PTJ0_30p0_10000p0[1,0,3]\"",
+
+  "ptJ0_HIG_17_025":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_30p0_45p0.*:r_PTJ0_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_30p0_45p0.*:r_PTJ0_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_30p0_45p0.*:r_PTJ0_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_30p0_45p0.*:r_PTJ0_30p0_45p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_45p0_70p0.*:r_PTJ0_45p0_70p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_45p0_70p0.*:r_PTJ0_45p0_70p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_45p0_70p0.*:r_PTJ0_45p0_70p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_45p0_70p0.*:r_PTJ0_45p0_70p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_70p0_110p0.*:r_PTJ0_70p0_110p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_70p0_110p0.*:r_PTJ0_70p0_110p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_70p0_110p0.*:r_PTJ0_70p0_110p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_70p0_110p0.*:r_PTJ0_70p0_110p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_110p0_200p0.*:r_PTJ0_110p0_200p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_110p0_200p0.*:r_PTJ0_110p0_200p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_110p0_200p0.*:r_PTJ0_110p0_200p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_110p0_200p0.*:r_PTJ0_110p0_200p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\"",
+
+  "ptJ0_30GeV":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_0p0_30p0.*:r_PTJ0_0p0_30p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_30p0_60p0.*:r_PTJ0_30p0_60p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_30p0_60p0.*:r_PTJ0_30p0_60p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_30p0_60p0.*:r_PTJ0_30p0_60p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_30p0_60p0.*:r_PTJ0_30p0_60p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_60p0_90p0.*:r_PTJ0_60p0_90p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_60p0_90p0.*:r_PTJ0_60p0_90p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_60p0_90p0.*:r_PTJ0_60p0_90p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_60p0_90p0.*:r_PTJ0_60p0_90p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_90p0_120p0.*:r_PTJ0_90p0_120p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_90p0_120p0.*:r_PTJ0_90p0_120p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_90p0_120p0.*:r_PTJ0_90p0_120p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_90p0_120p0.*:r_PTJ0_90p0_120p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_120p0_200p0.*:r_PTJ0_120p0_200p0[1,0,3]\" \
+--PO \"map=.*/ggh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/tth_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vh_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\" \
+--PO \"map=.*/vbf_PTJ0_200p0_10000p0.*:r_PTJ0_200p0_10000p0[1,0,3]\"",
+
+  "yJ0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_YJ0_0p0_0p5.*:r_YJ0_0p0_0p5[1,0,3]\" \
+--PO \"map=.*/tth_YJ0_0p0_0p5.*:r_YJ0_0p0_0p5[1,0,3]\" \
+--PO \"map=.*/vh_YJ0_0p0_0p5.*:r_YJ0_0p0_0p5[1,0,3]\" \
+--PO \"map=.*/vbf_YJ0_0p0_0p5.*:r_YJ0_0p0_0p5[1,0,3]\" \
+--PO \"map=.*/ggh_YJ0_0p5_1p2.*:r_YJ0_0p5_1p2[1,0,3]\" \
+--PO \"map=.*/tth_YJ0_0p5_1p2.*:r_YJ0_0p5_1p2[1,0,3]\" \
+--PO \"map=.*/vh_YJ0_0p5_1p2.*:r_YJ0_0p5_1p2[1,0,3]\" \
+--PO \"map=.*/vbf_YJ0_0p5_1p2.*:r_YJ0_0p5_1p2[1,0,3]\" \
+--PO \"map=.*/ggh_YJ0_1p2_2p0.*:r_YJ0_1p2_2p0[1,0,3]\" \
+--PO \"map=.*/tth_YJ0_1p2_2p0.*:r_YJ0_1p2_2p0[1,0,3]\" \
+--PO \"map=.*/vh_YJ0_1p2_2p0.*:r_YJ0_1p2_2p0[1,0,3]\" \
+--PO \"map=.*/vbf_YJ0_1p2_2p0.*:r_YJ0_1p2_2p0[1,0,3]\" \
+--PO \"map=.*/ggh_YJ0_2p0_2p5.*:r_YJ0_2p0_2p5[1,0,3]\" \
+--PO \"map=.*/tth_YJ0_2p0_2p5.*:r_YJ0_2p0_2p5[1,0,3]\" \
+--PO \"map=.*/vh_YJ0_2p0_2p5.*:r_YJ0_2p0_2p5[1,0,3]\" \
+--PO \"map=.*/vbf_YJ0_2p0_2p5.*:r_YJ0_2p0_2p5[1,0,3]\" \
+--PO \"map=.*/ggh_YJ0_NJ0.*:r_YJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/tth_YJ0_NJ0.*:r_YJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vh_YJ0_NJ0.*:r_YJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vbf_YJ0_NJ0.*:r_YJ0_NJ0[1,0,3]\"",
+
+  "AbsPhiHJ0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_3p03_Pi.*:r_AbsPhiHJ0_3p03_Pi[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_3p03_Pi.*:r_AbsPhiHJ0_3p03_Pi[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_3p03_Pi.*:r_AbsPhiHJ0_3p03_Pi[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_3p03_Pi.*:r_AbsPhiHJ0_3p03_Pi[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_NJ0.*:r_AbsPhiHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_NJ0.*:r_AbsPhiHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_NJ0.*:r_AbsPhiHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_NJ0.*:r_AbsPhiHJ0_NJ0[1,0,3]\"",
+
+  "AbsPhiHJ0_otherName":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_0p0_2p6.*:r_AbsPhiHJ0_0p0_2p6[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_2p6_2p9.*:r_AbsPhiHJ0_2p6_2p9[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_2p9_3p03.*:r_AbsPhiHJ0_2p9_3p03[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_3p03_3p1415926.*:r_AbsPhiHJ0_3p03_3p1415926[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_3p03_3p1415926.*:r_AbsPhiHJ0_3p03_3p1415926[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_3p03_3p1415926.*:r_AbsPhiHJ0_3p03_3p1415926[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_3p03_3p1415926.*:r_AbsPhiHJ0_3p03_3p1415926[1,0,3]\" \
+--PO \"map=.*/ggh_AbsPhiHJ0_NJ.*:r_AbsPhiHJ0_NJ[1,0,3]\" \
+--PO \"map=.*/tth_AbsPhiHJ0_NJ.*:r_AbsPhiHJ0_NJ[1,0,3]\" \
+--PO \"map=.*/vh_AbsPhiHJ0_NJ.*:r_AbsPhiHJ0_NJ[1,0,3]\" \
+--PO \"map=.*/vbf_AbsPhiHJ0_NJ.*:r_AbsPhiHJ0_NJ[1,0,3]\"",
+
+  "AbsYHJ0":"-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+--PO \"map=.*/ggh_AbsYHJ0_0p0_0p6.*:r_AbsYHJ0_0p0_0p6[1,0,3]\" \
+--PO \"map=.*/tth_AbsYHJ0_0p0_0p6.*:r_AbsYHJ0_0p0_0p6[1,0,3]\" \
+--PO \"map=.*/vh_AbsYHJ0_0p0_0p6.*:r_AbsYHJ0_0p0_0p6[1,0,3]\" \
+--PO \"map=.*/vbf_AbsYHJ0_0p0_0p6.*:r_AbsYHJ0_0p0_0p6[1,0,3]\" \
+--PO \"map=.*/ggh_AbsYHJ0_0p6_1p2.*:r_AbsYHJ0_0p6_1p2[1,0,3]\" \
+--PO \"map=.*/tth_AbsYHJ0_0p6_1p2.*:r_AbsYHJ0_0p6_1p2[1,0,3]\" \
+--PO \"map=.*/vh_AbsYHJ0_0p6_1p2.*:r_AbsYHJ0_0p6_1p2[1,0,3]\" \
+--PO \"map=.*/vbf_AbsYHJ0_0p6_1p2.*:r_AbsYHJ0_0p6_1p2[1,0,3]\" \
+--PO \"map=.*/ggh_AbsYHJ0_1p2_1p9.*:r_AbsYHJ0_1p2_1p9[1,0,3]\" \
+--PO \"map=.*/tth_AbsYHJ0_1p2_1p9.*:r_AbsYHJ0_1p2_1p9[1,0,3]\" \
+--PO \"map=.*/vh_AbsYHJ0_1p2_1p9.*:r_AbsYHJ0_1p2_1p9[1,0,3]\" \
+--PO \"map=.*/vbf_AbsYHJ0_1p2_1p9.*:r_AbsYHJ0_1p2_1p9[1,0,3]\" \
+--PO \"map=.*/ggh_AbsYHJ0_1p9_100p0.*:r_AbsYHJ0_1p9_100p0[1,0,3]\" \
+--PO \"map=.*/tth_AbsYHJ0_1p9_100p0.*:r_AbsYHJ0_1p9_100p0[1,0,3]\" \
+--PO \"map=.*/vh_AbsYHJ0_1p9_100p0.*:r_AbsYHJ0_1p9_100p0[1,0,3]\" \
+--PO \"map=.*/vbf_AbsYHJ0_1p9_100p0.*:r_AbsYHJ0_1p9_100p0[1,0,3]\" \
+--PO \"map=.*/ggh_AbsYHJ0_NJ0.*:r_AbsYHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/tth_AbsYHJ0_NJ0.*:r_AbsYHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vh_AbsYHJ0_NJ0.*:r_AbsYHJ0_NJ0[1,0,3]\" \
+--PO \"map=.*/vbf_AbsYHJ0_NJ0.*:r_AbsYHJ0_NJ0[1,0,3]\"",
+
+
+
   "kappas_resolved":"-P HiggsAnalysis.CombinedLimit.LHCHCGModels:K1 --PO BRU=0",
 
   "kappas":"-P HiggsAnalysis.CombinedLimit.LHCHCGModels:K2 --PO BRU=0",
 
   "kVkF":"-P HiggsAnalysis.CombinedLimit.LHCHCGModels:K3 --PO BRU=0"
 }
+
+
+def _make_extended_bsm_2d_model(cpl, fiducial=False):
+  if not fiducial:
+    return f"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep{cpl}_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHad{cpl}_incl.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tth{cpl}_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHW{cpl}_incl.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_incl.*:1" \
+    --PO "map=.*/bbH_incl.*:1" \
+    --PO "map=.*/vbf_incl.*:1" \
+    --PO "map=.*/vh_incl.*:1"
+"""
+  return f"""-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/tHqLep{cpl}_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tHqHad{cpl}_in.*:r_tHq[1,-1,5]" \
+    --PO "map=.*/tth{cpl}_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/tHW{cpl}_in.*:r_ttH[1,-1,5]" \
+    --PO "map=.*/ggh_in.*:1" \
+    --PO "map=.*/ggh_out.*:1" \
+    --PO "map=.*/bbh_in.*:1" \
+    --PO "map=.*/bbh_out.*:1" \
+    --PO "map=.*/vbf_in.*:1" \
+    --PO "map=.*/vbf_out.*:1" \
+    --PO "map=.*/vh_in.*:1" \
+    --PO "map=.*/vh_out.*:1" \
+    --PO "map=.*/tHqLep{cpl}_out.*:1" \
+    --PO "map=.*/tHqHad{cpl}_out.*:1" \
+    --PO "map=.*/tth{cpl}_out.*:1" \
+    --PO "map=.*/tHW{cpl}_out.*:1"
+"""
+
+
+# Extended BSM circle points used in the ttH/tH fiducial scans.
+_extended_bsm_points = (
+  "Kt0p500Ktt0p000",
+  "Kt0p354Ktt0p354",
+  "Kt0p000Ktt0p500",
+  "Ktm0p500Ktt0p000",
+  "Kt0p000Kttm0p500",
+  "Kt0p354Kttm0p354",
+  "Kt1p500Ktt0p000",
+  "Kt1p061Ktt1p061",
+  "Kt0p000Ktt1p500",
+  "Ktm1p500Ktt0p000",
+  "Kt0p000Kttm1p500",
+  "Kt1p061Kttm1p061",
+)
+for _cpl in _extended_bsm_points:
+  models[f"r_2D_{_cpl}"] = _make_extended_bsm_2d_model(_cpl, fiducial=False)
+  models[f"r_2D_{_cpl}_fiducial"] = _make_extended_bsm_2d_model(_cpl, fiducial=True)

@@ -15,17 +15,21 @@ def get_options():
   parser.add_option('--inputJson', dest='inputJson', default='inputs.json', help="Input json file to define fits")
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Type of fit")
   parser.add_option('--ext', dest='ext', default='', help="Running over Datacard with extension")
-  parser.add_option('--mass', dest='mass', default='125.38', help="Higgs mass")
-  parser.add_option('--setPdfIndices', dest='setPdfIndices', action="store_true", default=False, help="Set pdf indixes from pdfindex.json")
+  parser.add_option('--setPdfIndices', dest='setPdfIndices', action="store_true", default=False, help="Freeze pdfindex nuisances using defaults from the workspace")
   parser.add_option('--doObserved', dest='doObserved', action="store_true", default=False, help="Fit to data")
   parser.add_option('--snapshotWSFile', dest='snapshotWSFile', default='', help="Full path to snapshot WS file (use when running observed statonly as nuisances are froze at postfit values)")
   parser.add_option('--commonOpts', dest='commonOpts', default="--cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2", help="Common combine options for running fits")
+  parser.add_option('--freezeConstrainedNuisances', '--freeze-constrained-nuisances', dest='freezeConstrainedNuisances', action='store_true', default=False, help="Append allConstrainedNuisances to --freezeParameters for stat-only fits from the full workspace")
   parser.add_option('--batch', dest='batch', default='condor', help='Batch: [crab,condor/SGE/IC]')
+  parser.add_option('--mass', dest='mass', default='125.38', help="Higgs mass")
   parser.add_option('--queue', dest='queue', default='workday', help='Queue e.g. for condor=workday, for IC=hep.q')
   parser.add_option('--subOpts', dest='subOpts', default="", help="Submission options")
+  parser.add_option('--datacardDir', dest='datacardDir', default="", help="Directory containing Datacard_*.root (overrides default Combine dir)")
+  parser.add_option('--nameSuffix', dest='nameSuffix', default='', help="Suffix for task/output names (e.g. _fine)")
   parser.add_option('--doCustomCrab', dest='doCustomCrab', default=False, action="store_true", help="Load crab options from custom_crab.py file")
   parser.add_option('--crabMemory', dest='crabMemory', default='5900', help="Memory for crab job")
   parser.add_option('--dryRun', dest='dryRun', action="store_true", default=False, help="Only create submission files")
+  parser.add_option('--toysFile', dest='toysFile', default='', help="Use an existing toys file (e.g. SM Asimov) instead of --expectSignal -t -1")
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -43,10 +47,21 @@ def getPdfIndicesFromJson(pdfjson):
   for k,v in pdfidxs.items(): pdfStr += "%s=%s,"%(k,v)
   return pdfStr[:-1]
 
+def getPdfFreezeFromJson(pdfjson):
+  with open(pdfjson) as jsonfile:
+    pdfidxs = json.load(jsonfile)
+  return ",".join(pdfidxs.keys())
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Options:
 # Expected/Observed
-exp_opts = '' if opt.doObserved else '--expectSignal 1 -t -1'
+if opt.doObserved:
+  exp_opts = ''
+else:
+  if opt.toysFile != '':
+    exp_opts = '--toysFile %s -t -1'%opt.toysFile
+  else:
+    exp_opts = '--expectSignal 1 -t -1'
 
 # Common opts for combine jobs
 common_opts = opt.commonOpts
@@ -106,96 +121,213 @@ for fidx in range(len(fits)):
 
   # Dry run
   if opt.dryRun: _fit_opts += " --dry-run"
-  _name = "%s_%s"%(_fit.split(":")[0],_fit.split(":")[1])
+  name_suffix = opt.nameSuffix.strip()
+  if name_suffix and not name_suffix.startswith("_"):
+    name_suffix = "_%s" % name_suffix
+  _name = "%s_%s%s"%(_fit.split(":")[0],_fit.split(":")[1],name_suffix)
 
-  # Setting PDF indices
+  # Determine datacard dir early for workspace lookups
+  if opt.datacardDir != "":
+    datacard_dir = os.path.abspath(opt.datacardDir)
+  else:
+    datacard_dir = os.path.join(os.environ['CMSSW_BASE'], "src", "flashggFinalFit", "Combine")
+
+  # Freezing PDF indices (use defaults stored in workspace; no explicit setParameters)
+  def getPdfIndexNamesFromWS(ws_path):
+    fd = ROOT.TFile(ws_path)
+    ws = fd.Get("w")
+    if not ws:
+      fd.Close()
+      return []
+    names = []
+    nuis = ws.obj("ModelConfig").GetNuisanceParameters()
+    if nuis:
+      for n in nuis.contentsString().split(","):
+        n = n.strip()
+        if n.startswith("pdfindex_"):
+          names.append(n)
+    if not names:
+      # Fallback: scan allVars in case pdfindex_* not listed as nuisances
+      allvars = ws.allVars()
+      it = allvars.createIterator()
+      while True:
+        v = it.Next()
+        if not v:
+          break
+        name = v.GetName()
+        if name.startswith("pdfindex_"):
+          names.append(name)
+    if not names:
+      # pdfindex_* are often RooCategory, so also scan allCats
+      allcats = ws.allCats()
+      itc = allcats.createIterator()
+      while True:
+        c = itc.Next()
+        if not c:
+          break
+        name = c.GetName()
+        if name.startswith("pdfindex_"):
+          names.append(name)
+    ws.Delete()
+    fd.Close()
+    return names
+
   if opt.doObserved: 
     _name += "_obs"
-    pdf_opts = getPdfIndicesFromJson("pdfindex%s_observed.json"%opt.ext) if opt.setPdfIndices else ''
-  else: pdf_opts = getPdfIndicesFromJson("pdfindex%s.json"%opt.ext) if opt.setPdfIndices else ''
+    if opt.setPdfIndices:
+      if opt.snapshotWSFile != '':
+        ws_path = opt.snapshotWSFile
+      else:
+        ws_path = os.path.join(datacard_dir, "Datacard_%s.root" % opt.ext.lstrip('_')) if opt.ext != '' else os.path.join(datacard_dir, "Datacard%s_%s.root"%(opt.ext,opt.mode))
+      pdf_freeze = ",".join(getPdfIndexNamesFromWS(ws_path))
+      if pdf_freeze == '':
+        print("[WARN] --setPdfIndices enabled but no pdfindex_* found in workspace %s" % ws_path)
+      pdf_opts = ''
+    else:
+      pdf_opts = ''
+      pdf_freeze = ''
+  else:
+    if opt.setPdfIndices:
+      if opt.snapshotWSFile != '':
+        ws_path = opt.snapshotWSFile
+      else:
+        ws_path = os.path.join(datacard_dir, "Datacard_%s.root" % opt.ext.lstrip('_')) if opt.ext != '' else os.path.join(datacard_dir, "Datacard%s_%s.root"%(opt.ext,opt.mode))
+      pdf_freeze = ",".join(getPdfIndexNamesFromWS(ws_path))
+      if pdf_freeze == '':
+        print("[WARN] --setPdfIndices enabled but no pdfindex_* found in workspace %s" % ws_path)
+      pdf_opts = ''
+    else:
+      pdf_opts = ''
+      pdf_freeze = ''
 
   # File to load workspace
   if opt.snapshotWSFile != '': d_opts = '-d %s --snapshotName MultiDimFit'%opt.snapshotWSFile
   else:
-    #d_opts = '-d ../Datacard%s_%s.root'%(opt.ext,opt.mode)
-    d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard%s_%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode)
+    # If an extension is provided, text2workspace writes Datacard_<ext>.root
+    if opt.ext != '':
+      clean_ext = opt.ext.lstrip('_')
+      d_opts = '-d %s/Datacard_%s.root'%(datacard_dir,clean_ext)
+    else:
+      d_opts = '-d %s/Datacard%s_%s.root'%(datacard_dir,opt.ext,opt.mode)
 
   # If setParameters already in _fit_opts then add to fit opts and set pdfOpts = ''
   if( "setParameters" in _fit_opts )&( pdf_opts != '' ):
     pdfstr = re.sub("--setParameters ","",pdf_opts)
     _fit_opts = re.sub("--setParameters ","--setParameters %s,"%pdfstr,_fit_opts)
     pdf_opts = ''
+  if pdf_freeze == '' and pdf_opts != '':
+    pdf_freeze = ",".join([
+      kv.split("=")[0]
+      for kv in re.sub("--setParameters\\s+","",pdf_opts).split(",")
+      if "=" in kv
+    ])
+  if pdf_freeze != '':
+    existing_freeze = []
+    m = re.search(r"--freezeParameters\s+([^\s]+)", _fit_opts)
+    if m:
+      existing_freeze = [p for p in m.group(1).split(",") if p]
+      _fit_opts = re.sub(r"--freezeParameters\s+[^\s]+", "", _fit_opts, count=1).strip()
+    merged_freeze = list(dict.fromkeys(existing_freeze + [p for p in pdf_freeze.split(",") if p]))
+    _fit_opts = ("%s --freezeParameters %s" % (_fit_opts.strip(), ",".join(merged_freeze))).strip()
+
+  # Optionally freeze constrained nuisances (stat-only from full workspace).
+  if opt.freezeConstrainedNuisances and "allConstrainedNuisances" not in _fit_opts:
+    existing_freeze = []
+    m = re.search(r"--freezeParameters\s+([^\s]+)", _fit_opts)
+    if m:
+      existing_freeze = [p for p in m.group(1).split(",") if p]
+      _fit_opts = re.sub(r"--freezeParameters\s+[^\s]+", "", _fit_opts, count=1).strip()
+    merged_freeze = list(dict.fromkeys(existing_freeze + ["allConstrainedNuisances"]))
+    _fit_opts = ("%s --freezeParameters %s" % (_fit_opts.strip(), ",".join(merged_freeze))).strip()
 
   # Running different types of fits...
 
   # For best fit point
   if _fit.split(":")[0] == "bestfit":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s -P %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)  
       run(fitcmd)
 
   # For singles point
   if _fit.split(":")[0] == "singles":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo singles %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)  
       run(fitcmd)
 
   # For fixed point
   if _fit.split(":")[0] == "fixed":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s --algo fixed %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s --algo fixed %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)  
       run(fitcmd)
 
   # For asymptotic limit
   if _fit.split(":")[0] == "AsymptoticLimit":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M AsymptoticLimits -m 125.38 %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M AsymptoticLimits -m %s %s %s -n _%s_%s --redefineSignalPOI %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)    
       run(fitcmd)
 
   # For 1D scan when profiling other pois
   elif _fit.split(":")[0] == "profile1D":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 1 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)   
       run(fitcmd)
 
   # For 1D scan when fixing other pois
   elif _fit.split(":")[0] == "scan1D":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     for poi in _fitpois:
+      # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s --floatOtherPOIs 0 %s -n _%s_%s -P %s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,poi,opt.mass,d_opts,exp_opts,_name,poi,poi,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
       if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)      
+        fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,poi), fitcmd)     
       run(fitcmd)
 
   # For 2D scan: fix other pois to 0
   elif _fit.split(":")[0] == "profile2D":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poisStr = "%s_vs_%s"%(_fitpois[0],_fitpois[1])
+    # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s -P %s -P %s --floatOtherPOIs 1 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
     fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s -P %s -P %s --floatOtherPOIs 1 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,opt.mass,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)
     if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,_poisStr), fitcmd)      
+      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,_poisStr), fitcmd)
     run(fitcmd)
 
   # For 2D scan: fix other pois to 0
   elif _fit.split(":")[0] == "scan2D":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poisStr = "%s_vs_%s"%(_fitpois[0],_fitpois[1])
+    # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m 125.38 %s -P %s -P %s --floatOtherPOIs 0 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)   
     fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s_%s -M MultiDimFit -m %s %s -P %s -P %s --floatOtherPOIs 0 %s -n _%s_%s --algo grid --points %s --alignEdges 1 --split-points %s %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,_poisStr,opt.mass,d_opts,_fitpois[0],_fitpois[1],exp_opts,_name,_poisStr,_points.split(":")[0],_points.split(":")[1],_fit_opts,pdf_opts,common_opts,job_opts)    
     if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,_poisStr), fitcmd)      
+      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s_%s.sub; cd .."%(_name,_poisStr), fitcmd)    
     run(fitcmd)
 
   # Robust Hesse
   elif _fit.split(":")[0] == "robustHesse":
+    #if( "statonly" in _fit.split(":")[1] )&( "freezeParameters" not in _fit_opts ): _fit_opts += " --freezeParameters allConstrainedNuisances"
     _poi = _fitpois[0]
+    # fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s -M MultiDimFit -m 125.38 %s -P %s --floatOtherPOIs 1 %s -n _%s --robustHesse 1 --robustHesseSave 1 --saveFitResult %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,d_opts,_poi,exp_opts,_name,_fit_opts,pdf_opts,common_opts,job_opts)
     fitcmd = "cd runFits%s_%s; source /cvmfs/cms.cern.ch/crab3/crab.sh; combineTool.py --task-name %s -M MultiDimFit -m %s %s -P %s --floatOtherPOIs 1 %s -n _%s --robustHesse 1 --robustHesseSave 1 --saveFitResult %s %s %s %s; cd .."%(opt.ext,opt.mode,_name,opt.mass,d_opts,_poi,exp_opts,_name,_fit_opts,pdf_opts,common_opts,job_opts)
     if(os.environ['PWD'].startswith("/eos"))&(opt.batch == "condor")&(not opt.dryRun):
-      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s.sub; cd .."%(_name), fitcmd)      
+      fitcmd = re.sub("; cd ..", " --dry-run; condor_submit -spool condor_%s.sub; cd .."%(_name), fitcmd)   
     run(fitcmd)

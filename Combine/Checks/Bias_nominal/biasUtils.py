@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import os
-from os import system, path
+from os import system
 
 def rooArgSetToList(argset): ## taken from Andrea Marini's great repo here: https://github.com/amarini/rfwsutils/blob/master/wsutils.py#L300-L313
     """creates a python list with the contents of argset (which should be a RooArgSet)"""
@@ -29,25 +28,22 @@ def raiseFailError(itoy, lax=False):
 def shortName(name):
     return name.split('_')[-1]
 
-def toyName(name, expectSignal, split=None):
-    retval = f'BiasToys_Expected.{expectSignal}/biasStudy_{name}_toys.root'
-    if split is not None:
+def toyName(name, split=None):
+    retval = 'BiasToys/biasStudy_%s_toys.root'%name
+    if split is not None: 
         split = int(split)
-        retval = retval.replace(name, f'{name}_split{split}')
+        retval = retval.replace(name,'%s_split%g'%(name,split))
     return retval
 
-
-def fitName(name, expectSignal, split=None):
-    retval = f'BiasFits_Expected.{expectSignal}/biasStudy_{name}_fits.root'
-    if split is not None:
+def fitName(name, split=None):
+    retval = 'BiasFits/biasStudy_%s_fits.root'%name
+    if split is not None: 
         split = int(split)
-        retval = retval.replace(name, f'{name}_split{split}')
+        retval = retval.replace(name,'%s_split%g'%(name,split))
     return retval
 
-
-def plotName(name, expectSignal):
-    return f'BiasPlots_Expected.{expectSignal}/biasStudy_{name}_pulls'
-
+def plotName(name):
+    return 'BiasPlots/biasStudy_%s_pulls'%name
 
 def run(cmd, dry=False):
    print(cmd)

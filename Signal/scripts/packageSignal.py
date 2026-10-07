@@ -42,58 +42,73 @@ print(" --> Packaging output workspaces")
 packagedWS = ROOT.RooWorkspace("wsig_13TeV","wsig_13TeV")
 packagedWS.imp = getattr(packagedWS,"import")
 
-# Extract merged datasets (skip for bkg_had to avoid ROOT 1GB bytecount limit).
+# ==============================================================================
+# NOTE ON bkg_had:
+# We skip creating a single merged dataset (sig_mass_m125_bkg_had) for the bkg_had 
+# category because it contains too many events across all processes. Merging them into 
+# one object exceeds ROOT's 1 GB TBuffer limit and causes a crash. All individual 
+# process datasets (ggH, VBF, ttH, bbH, etc.) remain 100% intact and saved, which is 
+# all CMS Combine requires.
+# ==============================================================================
+
+# Define the merged dataset names for this category so we can exclude them from input loops
+merged_dataset_names = ["sig_mass_m%s_%s" % (mp, opt.cat) for mp in opt.massPoints.split(",")]
+
 data_merged = {}
-data_merged_names = []
 skip_merged = (opt.cat == "bkg_had")
-print("\n" + "="*40)
-print(" DEBUG: MERGE BLOCK STATUS")
-print("="*40)
-print(" 1. Current category being processed: ", opt.cat)
-print(" 2. Did it trigger the skip? (skip_merged): ", skip_merged)
+
 if not skip_merged:
-  print(" 3. Action: Merging datasets together...")
-  for mp in opt.massPoints.split(","):
-    data_merged["m%s"%mp] = ROOT.TFile(fNames[opt.exts.split(",")[0]][0]).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat)).emptyClone("sig_mass_m%s_%s"%(mp,opt.cat))
-    data_merged_names.append(data_merged["m%s"%mp].GetName())
-    print("    -> Added to merge list: ", data_merged["m%s"%mp].GetName())
-  else:
-   print(" 3. Action: Skipping merge block entirely (List remains empty!)")
-  print(" 4. Final list of merged dataset names: ", data_merged_names)
-  print("="*40 + "\n")
-  for ext, fNames_by_ext in fNames.items():
-    for fName in fNames_by_ext:
-      for mp in opt.massPoints.split(","):
-        d = ROOT.TFile(fName).Get("wsig_13TeV").data("sig_mass_m%s_%s"%(mp,opt.cat))
-        for i in range(d.numEntries()):
-          p = d.get(i)
-          w = d.weight()
-          data_merged["m%s"%mp].add(p,w)
+    print(" --> Action: Merging datasets together for category %s..." % opt.cat)
+    # Initialize empty clones for merging
+    for mp in opt.massPoints.split(","):
+        ds_name = "sig_mass_m%s_%s" % (mp, opt.cat)
+        first_file = ROOT.TFile(fNames[opt.exts.split(",")[0]][0])
+        first_ws = first_file.Get("wsig_13TeV")
+        if first_ws and first_ws.data(ds_name):
+            data_merged["m%s" % mp] = first_ws.data(ds_name).emptyClone(ds_name)
 
-  for _data in data_merged.values(): packagedWS.imp(_data)
-        
-# Loop over input signal fit workspaces
+    # Accumulate events across all files
+    for ext, fNames_by_ext in fNames.items():
+        for fName in fNames_by_ext:
+            fin = ROOT.TFile(fName)
+            wsin = fin.Get("wsig_13TeV")
+            if not wsin: continue
+            for mp in opt.massPoints.split(","):
+                d = wsin.data("sig_mass_m%s_%s" % (mp, opt.cat))
+                if not d: continue
+                for i in range(d.numEntries()):
+                    data_merged["m%s" % mp].add(d.get(i), d.weight())
+
+    # Import merged dataset ONCE into output workspace
+    for _data in data_merged.values():
+        packagedWS.imp(_data)
+else:
+    print(" --> Action: Skipping merged dataset creation for %s to avoid 1GB ROOT buffer limit." % opt.cat)
+
+# Loop over input signal fit workspaces and import individual process datasets
 for ext, fNames_by_ext in fNames.items():
-  for fName in fNames_by_ext:
-    fin = ROOT.TFile(fName)
-    wsin = fin.Get("wsig_13TeV")
-    if not wsin: continue
-    allVars, allFunctions, allPdfs = {}, {}, {}
-    for _var in rooiter(wsin.allVars()): allVars[_var.GetName()] = _var
-    for _func in rooiter(wsin.allFunctions()): allFunctions[_func.GetName()] = _func
-    for _pdf in rooiter(wsin.allPdfs()): allPdfs[_pdf.GetName()] = _pdf
-    allData = wsin.allData()
+    for fName in fNames_by_ext:
+        fin = ROOT.TFile(fName)
+        wsin = fin.Get("wsig_13TeV")
+        if not wsin: continue
+        
+        allVars, allFunctions, allPdfs = {}, {}, {}
+        for _var in rooiter(wsin.allVars()): allVars[_var.GetName()] = _var
+        for _func in rooiter(wsin.allFunctions()): allFunctions[_func.GetName()] = _func
+        for _pdf in rooiter(wsin.allPdfs()): allPdfs[_pdf.GetName()] = _pdf
+        allData = wsin.allData()
 
-    # Import objects into output workspace
-    for _varName, _var in allVars.items(): packagedWS.imp(_var,ROOT.RooFit.RecycleConflictNodes(),ROOT.RooFit.Silence())
-    for _funcName, _func in allFunctions.items(): packagedWS.imp(_func,ROOT.RooFit.RecycleConflictNodes(),ROOT.RooFit.Silence())
-    for _pdfName, _pdf in allPdfs.items(): packagedWS.imp(_pdf,ROOT.RooFit.RecycleConflictNodes(),ROOT.RooFit.Silence())
+        # Import objects into output workspace
+        for _varName, _var in allVars.items(): packagedWS.imp(_var, ROOT.RooFit.RecycleConflictNodes(), ROOT.RooFit.Silence())
+        for _funcName, _func in allFunctions.items(): packagedWS.imp(_func, ROOT.RooFit.RecycleConflictNodes(), ROOT.RooFit.Silence())
+        for _pdfName, _pdf in allPdfs.items(): packagedWS.imp(_pdf, ROOT.RooFit.RecycleConflictNodes(), ROOT.RooFit.Silence())
 
-    for _data in allData:
-      # Skip merged datasets
-      if _data.GetName() in data_merged_names: continue
-      else: packagedWS.imp(_data)
-
+        for _data in allData:
+            # EXCLUDE merged dataset names from input files so they don't get imported multiple times
+            if _data.GetName() in merged_dataset_names:
+                continue
+            else:
+                packagedWS.imp(_data)
 # Save to file
 if opt.outputDir == swd__:
   if not os.path.isdir("outdir_%s"%opt.outputExt): os.system("mkdir outdir_%s"%opt.outputExt)

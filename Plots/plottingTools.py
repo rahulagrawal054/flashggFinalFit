@@ -78,7 +78,7 @@ def extractBandProperties(data,category,bidx):
   props['down2sigma'] = np.percentile(data['%s_%g'%(c,bidx)].values,50*(1+math.erf(-2./math.sqrt(2))))
   return props
 
-def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduceRange=None):
+def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduceRange=None,splitS=None,splitSr=None):
   translateCats = {} if options.translateCats is None else LoadTranslations(options.translateCats)
   translatePOIs = {} if options.translatePOIs is None else LoadTranslations(options.translatePOIs)
   blindingRegion = [float(options.blindingRegion.split(",")[0]),float(options.blindingRegion.split(",")[1])]
@@ -155,6 +155,23 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     gr_2sig_r.SetFillStyle(1001)
     gr_2sig.Draw("LE3SAME")
     gr_1sig.Draw("LE3SAME")
+  # # Add legend
+  # if options.doBands: leg = ROOT.TLegend(0.58,0.46,0.86,0.76)
+  # else: leg = ROOT.TLegend(0.58,0.52,0.86,0.76)
+  # leg.SetFillStyle(0)
+  # leg.SetLineColor(0)
+  # leg.SetTextSize(0.045)
+  # leg.AddEntry(hD,"Data","ep")
+  # if options.unblind:
+  #   leg.AddEntry(hSB['pdfNBins'],"S+B fit","l")
+  #   leg.AddEntry(hB['pdfNBins'],"B component","l")
+  # else:
+  #   leg.AddEntry(hB['pdfNBins'],"B fit","l")
+  #   leg.AddEntry(hS['pdfNBins'],"S model","fl")
+  # if options.doBands:
+  #   leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
+  #   leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
+  # leg.Draw("Same")
   # Set pdf style
   if options.unblind:
     hSB['pdfNBins'].SetLineWidth(3)
@@ -165,17 +182,47 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     hB['pdfNBins'].SetLineStyle(2)
     hB['pdfNBins'].Draw("Hist same c")
   else:
-    hS['pdfNBins'].SetLineWidth(3)
-    hS['pdfNBins'].SetLineColor(9)
-    hS['pdfNBins'].SetFillColor(38)
-    hS['pdfNBins'].SetFillStyle(1001)
-    hS['pdfNBins'].GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
-    hS['pdfNBins'].Draw("Hist same cf")
+    # Draw split components if provided: order = resonant (dashed line), then tHq (fill), then top (fill)
+    if splitS is not None and len(splitS) >= 2:
+      # Resonant dashed line if provided as 3rd component
+      if len(splitS) >= 3 and splitS[2] is not None:
+        hRes = splitS[2]['pdfNBins']
+        hRes.SetLineWidth(3)
+        hRes.SetLineColor(ROOT.kMagenta+1)
+        hRes.SetLineStyle(2)
+        hRes.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+        hRes.Draw("Hist same c")
+      # tHq (second element) as filled
+      hTHq = splitS[1]['pdfNBins']
+      hTHq.SetLineWidth(2)
+      hTHq.SetLineColor(ROOT.kGreen+3)
+      hTHq.SetFillColor(ROOT.kGreen-7)
+      hTHq.SetFillStyle(1001)
+      hTHq.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      hTHq.Draw("Hist same cf")
+      # Top (first element) as filled on top
+      hTop = splitS[0]['pdfNBins']
+      hTop.SetLineWidth(2)
+      hTop.SetLineColor(ROOT.kBlue+2)
+      hTop.SetFillColor(ROOT.kAzure-9)
+      hTop.SetFillStyle(1001)
+      hTop.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      hTop.Draw("Hist same cf")
+    else:
+      hS['pdfNBins'].SetLineWidth(3)
+      hS['pdfNBins'].SetLineColor(9)
+      hS['pdfNBins'].SetFillColor(38)
+      hS['pdfNBins'].SetFillStyle(1001)
+      hS['pdfNBins'].GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      hS['pdfNBins'].Draw("Hist same cf")
     hB['pdfNBins'].SetLineWidth(3)
     hB['pdfNBins'].SetLineColor(2)
     hB['pdfNBins'].Draw("Hist same c")
-
   # Set data style
+  # hD.SetMarkerStyle(20)
+  # hD.SetMarkerColor(1)
+  # hD.SetLineColor(1)
+  # hD.Draw("Same PE")
   gD = ROOT.TGraphAsymmErrors()
   for ibin in range(1,hD.GetNbinsX()+1):
     gD.SetPoint(ibin-1,hD.GetBinCenter(ibin),hD.GetBinContent(ibin))
@@ -201,11 +248,22 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     leg.AddEntry(hB['pdfNBins'],"B component","l")
   else:
     leg.AddEntry(hB['pdfNBins'],"B fit","l")
-    leg.AddEntry(hS['pdfNBins'],"S model","fl")
+    if splitS is not None and len(splitS) >= 2:
+      labels = options.splitLabels.split(",")
+      lab_top  = labels[0] if len(labels) > 0 else "ttH+tHW"
+      lab_thq  = labels[1] if len(labels) > 1 else "tHq"
+      lab_res  = labels[2] if len(labels) > 2 else "Resonant"
+      leg.AddEntry(splitS[0]['pdfNBins'], lab_top, "fl")
+      leg.AddEntry(splitS[1]['pdfNBins'], lab_thq, "fl")
+      if len(splitS) >= 3 and splitS[2] is not None:
+        leg.AddEntry(splitS[2]['pdfNBins'], lab_res, "l")
+    else:
+      leg.AddEntry(hS['pdfNBins'],"S model","fl")
   if options.doBands:
     leg.AddEntry(gr_1sig,"#pm1 #sigma","F")
     leg.AddEntry(gr_2sig,"#pm2 #sigma","F")
   leg.Draw("Same")
+
 
   # Add TLatex to plot
   lat0 = ROOT.TLatex()
@@ -213,15 +271,37 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
   lat0.SetTextAlign(11)
   lat0.SetNDC()
   lat0.SetTextSize(0.06)
-  #lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
-  lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
-  lat0.DrawLatex(0.6,0.92,"8.0 fb^{-1} (13.6 TeV)")
+  #lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Internal}")
+  lat0.DrawLatex(0.12,0.92,"#bf{CMS} #it{Preliminary}")
+  #lat0.DrawLatex(0.12,0.92,"#bf{CMS}")
+  #lat0.DrawLatex(0.6,0.92,"137 fb^{-1} (13 TeV)")
+  # lat0.DrawLatex(0.565,0.92,"34.7 fb^{-1} (13.6 TeV)")
+  lat0.DrawLatex(0.565,0.92,"62.4 fb^{-1} (13.6 TeV)")
   lat0.DrawLatex(0.6,0.8,"#scale[0.6]{%s}"%Translate(cat,translateCats))
   #lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H#rightarrow#gamma#gamma}")
-  lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H #rightarrow #gamma#gamma, m_{H} = 125.38 GeV}")
+  lat0.DrawLatex(0.15,0.83,"#scale[0.75]{H #rightarrow #gamma#gamma, m_{H} = 125.08 GeV}")
   if "PseudoToy" in options.inputWSFile:
     lat0.DrawLatex(0.15,0.76,"#scale[0.75]{Pseudo data}")
-
+  if(options.loadSnapshot is not None):
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = STXS stage 1.2 minimal}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{ggH}, #mu_{VBF}, #mu_{VH}, #mu_{top})}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.5]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (1.07,1.04,1.34,1.35)}")
+    #lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = 1.03}")
+    #muhat_ggh, muhat_vbf, muhat_vh, muhat_top, mhhat = workspace.var("r_ggH").getVal(), workspace.var("r_VBF").getVal(), workspace.var("r_VH").getVal(), workspace.var("r_top").getVal(), workspace.var("MH").getVal()
+    #lat0.DrawLatex(0.13,0.77,"#scale[0.6]{(#hat{#mu}_{ggH},#hat{#mu}_{VBF},#hat{#mu}_{VH},#hat{#mu}_{top}) = (%.2f,%.2f,%.2f,%.2f)}"%(muhat_ggh,muhat_vbf,muhat_vh,muhat_top))
+    if options.POI != '':
+      muhat, mhhat = workspace.var(options.POI).getVal(), workspace.var("MH").getVal()
+      lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#hat{#mu} = %.2f}"%(muhat))
+    else:
+      lat0.DrawLatex(0.15,0.77,"#scale[0.6]{#vec{#alpha} = (#mu_{ggH}, #mu_{VBF}, #mu_{VH}, #mu_{top})}")
+  #elif options.parameterMap is not None:
+  #  poiStr = ''
+  #  for kv in options.parameterMap.split(","):
+  #    [k,v] = kv.split(":")
+  #    poiStr += ' %s = %.1f,'%(Translate(k,translatePOIs),float(v))
+  #  poiStr = poiStr[:-1]
+  #  lat0.DrawLatex(0.13,0.77,"#scale[0.75]{%s}"%poiStr)
+  else: lat0.DrawLatex(0.15,0.77,"#scale[0.75]{#mu = 1.0}")
   # Ratio plot
   pad2.cd()
   h_axes_ratio = hDr.Clone()
@@ -251,16 +331,41 @@ def makeSplusBPlot(workspace,hD,hSB,hB,hS,hDr,hBr,hSr,cat,options,dB=None,reduce
     hBr.SetLineColor(2)
     hBr.Draw("Hist same c")
   else:
-    hSr.SetLineWidth(3)
-    hSr.SetLineColor(9)
-    hSr.SetFillColor(38)
-    hSr.SetFillStyle(1001)
-    hSr.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
-    hSr.Draw("Hist same cf")
+    if splitSr is not None and len(splitSr) >= 2:
+      # Resonant dashed line if provided as 3rd component
+      if len(splitSr) >= 3 and splitSr[2] is not None:
+        rRes = splitSr[2]
+        rRes.SetLineWidth(3)
+        rRes.SetLineColor(ROOT.kMagenta+1)
+        rRes.SetLineStyle(2)
+        rRes.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+        rRes.Draw("Hist same c")
+      # tHq as filled
+      rTHq = splitSr[1]
+      rTHq.SetLineWidth(2)
+      rTHq.SetLineColor(ROOT.kGreen+3)
+      rTHq.SetFillColor(ROOT.kGreen-7)
+      rTHq.SetFillStyle(1001)
+      rTHq.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      rTHq.Draw("Hist same cf")
+      # Top as filled
+      rTop = splitSr[0]
+      rTop.SetLineWidth(2)
+      rTop.SetLineColor(ROOT.kBlue+2)
+      rTop.SetFillColor(ROOT.kAzure-9)
+      rTop.SetFillStyle(1001)
+      rTop.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      rTop.Draw("Hist same cf")
+    else:
+      hSr.SetLineWidth(3)
+      hSr.SetLineColor(9)
+      hSr.SetFillColor(38)
+      hSr.SetFillStyle(1001)
+      hSr.GetXaxis().SetRangeUser(blindingRegion[0],blindingRegion[1])
+      hSr.Draw("Hist same cf")
     hBr.SetLineWidth(3)
     hBr.SetLineColor(2)
     hBr.Draw("Hist same c")
-
   # Set data style
   gDr = ROOT.TGraphAsymmErrors()
   for ibin in range(1,hDr.GetNbinsX()+1):

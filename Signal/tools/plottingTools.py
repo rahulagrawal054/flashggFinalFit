@@ -472,31 +472,37 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   effSigma_low, effSigma_high = _hists['pdf'].GetMean()-effSigma, _hists['pdf'].GetMean()+effSigma
   h_effSigma = _hists['pdf'].Clone()
   h_effSigma.GetXaxis().SetRangeUser(effSigma_low,effSigma_high)
-
   # Legend
-  if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
-    leg0 = ROOT.TLegend(0.15+offset,0.6,0.5+offset,0.82)
-    leg0.SetFillStyle(0)
-    leg0.SetLineColor(0)
-    leg0.SetTextSize(0.03)
-    leg0.AddEntry(_hists['data'],"Simulation","ep")
-    # leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model (%s)}"%year,"l")
-    leg0.AddEntry(_hists['pdf'],"#splitline{Parametric}{model}","l")
-    leg0.Draw("Same")
+  if len(_opt.years.split(",")) > 1 and _opt.plot_years_separate:
+      # Top legend: Simulation & Parametric model
+      leg0 = ROOT.TLegend(0.15 + offset, 0.70, 0.55 + offset, 0.84)
+      leg0.SetFillStyle(0)
+      leg0.SetLineColor(0)
+      leg0.SetTextSize(0.025)
+      leg0.SetMargin(0.12)  # Shortens key width to prevent horizontal overlap
+      leg0.AddEntry(_hists['data'], "Simulation", "ep")
+      leg0.AddEntry(_hists['pdf'], "#splitline{Parametric}{model}", "l")
+      leg0.Draw("Same")
 
-    leg1 = ROOT.TLegend(0.17+offset,0.45,0.4+offset,0.61)
-    leg1.SetFillStyle(0)
-    leg1.SetLineColor(0)
-    leg1.SetTextSize(0.03)
-    for year in _opt.years.split(","): leg1.AddEntry(_hists['pdf_%s'%year],"#splitline{%s:}{#scale[0.8]{#sigma_{eff} = %1.2f GeV}}"%(year,getEffSigma(_hists['pdf_%s'%year])),"l")
-    leg1.Draw("Same")
+      # Middle legend: Per-year effective sigmas
+      leg1 = ROOT.TLegend(0.15 + offset, 0.38, 0.55 + offset, 0.66)
+      leg1.SetFillStyle(0)
+      leg1.SetLineColor(0)
+      leg1.SetTextSize(0.022)
+      leg1.SetMargin(0.12)  # Prevents dashed lines from drawing across the text
+      for year in _opt.years.split(","):
+          eff_sig = getEffSigma(_hists['pdf_%s' % year])
+          leg1.AddEntry(_hists['pdf_%s' % year], "%s: #sigma_{eff} = %1.2f GeV" % (year, eff_sig), "l")
+      leg1.Draw("Same")
 
-    leg2 = ROOT.TLegend(0.15+offset,0.3,0.5+offset,0.45)
-    leg2.SetFillStyle(0)
-    leg2.SetLineColor(0)
-    leg2.SetTextSize(0.03)
-    leg2.AddEntry(h_effSigma,"#sigma_{eff} = %1.2f GeV"%(0.5*(effSigma_high-effSigma_low)),"fl")
-    leg2.Draw("Same")
+      # Bottom legend: Total effective sigma band
+      leg2 = ROOT.TLegend(0.15 + offset, 0.24, 0.55 + offset, 0.36)
+      leg2.SetFillStyle(0)
+      leg2.SetLineColor(0)
+      leg2.SetTextSize(0.025)
+      leg2.SetMargin(0.12)  # Prevents grey box icon from covering the label text
+      leg2.AddEntry(h_effSigma, "#sigma_{eff} = %1.2f GeV" % (0.5 * (effSigma_high - effSigma_low)), "fl")
+      leg2.Draw("Same")
   else:
     year = _opt.years
     leg = ROOT.TLegend(0.15+offset,0.4,0.5+offset,0.82)

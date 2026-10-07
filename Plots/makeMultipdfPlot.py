@@ -27,12 +27,18 @@ def get_options():
   parser.add_option("--pdfNBins", dest="pdfNBins", default=3200, type='int', help="Number of bins")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
   parser.add_option("--inputSignalWSFile", dest="inputSignalWSFile", default=None, help="Input wsig_13TeV RooWorkspace file. If not none this will add signal to plot")
+  parser.add_option("--bkgExt", dest="bkgExt", default="13TeV", help="Extension used in bkg object names inside workspace (e.g. 13TeV, 13TeV_2022, auto, etc.)")
   
   return parser.parse_args()
 (opt,args) = get_options()
 
+
+
+# Track whether we add signal curves
+doSignal = False
+
 if opt.inputWSFile is not None:
-  print((" --> Opening workspace: %s"%opt.inputWSFile))
+  print(" --> Opening workspace: %s"%opt.inputWSFile)
   f = ROOT.TFile(opt.inputWSFile)
   w = f.Get("multipdf")
 
@@ -47,8 +53,13 @@ xvar.setUnit(opt.xvar.split(",")[2])
 xvar_arglist, xvar_argset = ROOT.RooArgList(xvar), ROOT.RooArgSet(xvar)
 
 # Exact multipdf object and pdfindex
-multipdf = w.pdf("CMS_hgg_%s_13TeV_bkgshape"%opt.cat)
-pdfindex_bf = w.cat("pdfindex_%s_13TeV"%opt.cat).getIndex()
+_ext = str(opt.bkgExt)
+multipdf = w.pdf("CMS_hgg_%s_%s_bkgshape"%(opt.cat,_ext))
+pdfindex_cat = w.cat("pdfindex_%s_%s"%(opt.cat,_ext))
+if pdfindex_cat:
+  pdfindex_bf = pdfindex_cat.getIndex()
+else:
+  raise RuntimeError("Could not find RooCategory 'pdfindex_%s_%s' in workspace. Use --bkgExt to match the workspace object names."%(opt.cat,_ext))
 bpdf_bf_name = None
 bpdfs = od()
 for ipdf in range(multipdf.getNumPdfs()): 
@@ -56,7 +67,10 @@ for ipdf in range(multipdf.getNumPdfs()):
   if ipdf == pdfindex_bf: bpdf_bf_name = multipdf.getPdf(ipdf).GetName()
 
 # Make histograms from bpdfs and scale by norm
-norm = w.var("CMS_hgg_%s_13TeV_bkgshape_norm"%opt.cat).getVal()
+normVar = w.var("CMS_hgg_%s_%s_bkgshape_norm"%(opt.cat,_ext))
+if not normVar:
+  raise RuntimeError("Could not find norm variable 'CMS_hgg_%s_%s_bkgshape_norm' in workspace"%(opt.cat,_ext))
+norm = normVar.getVal()
 
 hists = od()
 for bname, bpdf in list(bpdfs.items()):
@@ -115,15 +129,20 @@ if opt.inputSignalWSFile is not None:
   for year in years_to_process:
     allNorms = wsig.allFunctions().selectByName("*%s*normThisLumi"%year)
     for norm in rooiter(allNorms):
+      # proc = norm.GetName().split("_%s_"%sqrts__)[-1].split("_RECO")[0]
       # Set integrated lumi
       wsig.var("IntLumi").setVal(lumiMap[year]*lumiScaleFactor)
       proc = norm.GetName().split("hggpdfsmrel_")[-1].split("_%s_"%year)[0]
       k  =  "%s__%s"%(proc,year)
+      # _id = "%s_%s_%s_%s"%(year,sqrts__,proc,cat)
+      # norms[k] = w.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
       _id = "%s_%s_%s_%s"%(proc,year,cat,sqrts__)
       norms[k] = wsig.function("%s_%s_normThisLumi"%(outputWSObjectTitle__,_id))
-
+      
+      # pdf = wsig.pdf("extend%s_%sThisLumi"%(outputWSObjectTitle__,_id))
       pdf = wsig.pdf("%s_%s"%(outputWSObjectTitle__,_id))
       spdfs[_id] = pdf.createHistogram("h_pdf_%s"%_id,xvar,ROOT.RooFit.Binning(opt.pdfNBins))
+      #spdfs[_id].Scale(160./320)
       spdfs[_id].Scale(norms[k].getVal()*(float(opt.pdfNBins)/float(opt.nBins)))
 
   # Sum pdf histograms
@@ -248,7 +267,7 @@ lat1.SetTextFont(42)
 lat1.SetTextAlign(31)
 lat1.SetNDC()
 lat1.SetTextSize(0.06)
-#lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
+# lat1.DrawLatex(0.9,0.92,"137 fb^{-1} (13 TeV)")
 
 pad2.cd()
 h_axes_ratio = hists_ratio['data'].Clone()
@@ -292,7 +311,6 @@ lat2.SetTextSize(0.045*padSizeRatio)
 lat2.DrawLatex(0.87,0.91,"Best fit B function subtracted")
 
 canv.Update()
-
 ext_str = f"_{opt.ext}" if opt.ext != "" else ""
 if not os.path.isdir(f"plots{ext_str}"):
   os.system(f"mkdir -p plots{ext_str}")
