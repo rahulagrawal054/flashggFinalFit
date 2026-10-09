@@ -68,6 +68,7 @@ all:  $(BINS)
 $(EXEDIR)/%: $(TESTDIR)/%.cpp $(LIBDIR)/lib$(LIBNAME).so $(BASEDIR)/interface/*.h  
 	@echo Compiling executable $@
 	@$(CXX) -o $@ $(CXXFLAGS) $< $(ROOT_DICT) $(ROOTCLASSES) $(LIBS) -L$(LIBDIR) -l$(LIBNAME) $(USERLIBSX)
+	@cp $(ROOT_DICT:.cxx=_rdict.pcm) $(EXEDIR)/
 
 $(OBJDIR)/%.$(OBJ_EXT): $(SRCDIR)/%.cc $(ROOT_DICT) 
 	@echo Making object $@
@@ -76,6 +77,7 @@ $(OBJDIR)/%.$(OBJ_EXT): $(SRCDIR)/%.cc $(ROOT_DICT)
 $(LIBDIR)/lib$(LIBNAME).so: $(OBJS) $(ROOT_OBJ)
 	@echo Building shared library $@
 	@$(LD) $(LDFLAGS) -o $(LIBDIR)/lib$(LIBNAME).so $^ $(LIBS)
+	@cp $(ROOT_DICT:.cxx=_rdict.pcm) $(LIBDIR)/
 	
 $(ROOT_DICT): $(SRCS) $(HEADERS)
 	@echo Making dictionary $@
