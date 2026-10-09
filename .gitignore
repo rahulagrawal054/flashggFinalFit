@@ -83,3 +83,9 @@ __pycache__/
 /Signal/make_signal_slides/output/
 /Signal/make_signal_slides/signal_comparison_output/
 /Signal/tables/
+
+# Local background backups and generated bias-study runs
+/Background/test/fTest.cpp.before_florian_*.bak
+/Background/*-webconflict-*.md
+/Combine/Checks/Bias_nominal/runs/
+/Combine/Checks/Bias_nominal_old/old/

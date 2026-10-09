@@ -41,7 +41,8 @@ if opt.inputConfig != '':
     options['catOffset']    = _cfg['catOffset']
     options['ext']          = _cfg['ext']
     options['year']         = _cfg['year']
-    options['lumi']         = lumiMap[_cfg['year']]
+    options['lumi']         = _cfg.get('lumi', lumiMap[_cfg['year']])
+    options['sqrts']        = _cfg.get('sqrts', 13.0)
     options['batch']        = _cfg['batch']
     options['queue']        = _cfg['queue']
 

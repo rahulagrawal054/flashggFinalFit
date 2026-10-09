@@ -1,4 +1,4 @@
-# Config file: options for signal fitting
+# Background modelling for the ttH/tH CP analysis
 
 backgroundScriptCfg = {
   
@@ -7,6 +7,8 @@ backgroundScriptCfg = {
   'cats':'auto', # auto: automatically inferred from input ws
   'catOffset':0, # add offset to category numbers (useful for categories from different allData.root files)  
   'ext':'tth_th_analysis', # extension to add to output directory
+  'lumi':61.9, # integrated luminosity in fb^-1
+  'sqrts':13.6, # collision energy in TeV
   'year':'combined', # Use combined when merging all years in category (for plots)
 
   # Job submission options
