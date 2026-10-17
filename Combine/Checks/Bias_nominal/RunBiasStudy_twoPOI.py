@@ -167,6 +167,13 @@ def injection_grid(value):
 gridTtH = injection_grid(opts.gridTtH) if opts.gridTtH is not None else gridVals
 gridTHq = injection_grid(opts.gridTHq) if opts.gridTHq is not None else gridVals
 gridPoints = [(ttH, tHq) for ttH in gridTtH for tHq in gridTHq]
+for poi, values, lo, hi in [('r_ttH', gridTtH, opts.rMinTtH, opts.rMaxTtH),
+                            ('r_tHq', gridTHq, opts.rMinTHq, opts.rMaxTHq)]:
+    if not all(math.isfinite(v) for v in [lo, hi]):
+        parser.error("%s range must have finite endpoints" % poi)
+    for value in values:
+        if not lo <= value <= hi:
+            parser.error("Injected %s=%g is outside [%g,%g]; refusing silent clipping" % (poi, value, lo, hi))
 rRanges = "r_ttH=%g,%g:r_tHq=%g,%g" % (opts.rMinTtH, opts.rMaxTtH, opts.rMinTHq, opts.rMaxTHq)
 
 print()
@@ -250,7 +257,7 @@ if opts.toys:
         name = shortName(pdfName)
         for (ttH, tHq) in gridPoints:
             toyCmdBase = ('combine -m %.4f -d %s -M GenerateOnly -s %g --saveToys %s --toysNoSystematics'
-                          % (opts.mH, shlex.quote(opts.datacard), opts.seed, ""))
+                          % (opts.mH, shlex.quote(opts.datacard), opts.seed, '--setParameterRanges '+rRanges))
             setParams = '%s=%g,r_ttH=%g,r_tHq=%g' % (indexName, ipdf, ttH, tHq)
             if opts.split is not None and opts.nToys > opts.split:
                 for isplit in range(opts.nToys // opts.split):
