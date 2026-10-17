@@ -51,6 +51,8 @@ parser.add_option("--poi", default=None, choices=POIS,
                         "and --plots; run the script twice to cover both POIs." % POIS)
 parser.add_option("--floatOtherPOIs", default=1, type="int",
                   help="1 profiles the other POI; 0 fixes it to its injected value (default: %default)")
+parser.add_option("--fitStart", default=1., type="float",
+                  help="Starting value of measured POI, independent of injected truth (default: %default). Other POI starts at its injected value.")
 parser.add_option("-m", "--mH", default=125.08, type="float")
 parser.add_option("-c", "--combineOptions",
                   default="--cminDefaultMinimizerStrategy 0 "
@@ -174,6 +176,10 @@ for poi, values, lo, hi in [('r_ttH', gridTtH, opts.rMinTtH, opts.rMaxTtH),
     for value in values:
         if not lo <= value <= hi:
             parser.error("Injected %s=%g is outside [%g,%g]; refusing silent clipping" % (poi, value, lo, hi))
+if opts.fits:
+    lo, hi = (opts.rMinTtH, opts.rMaxTtH) if opts.poi == 'r_ttH' else (opts.rMinTHq, opts.rMaxTHq)
+    if not math.isfinite(opts.fitStart) or not lo <= opts.fitStart <= hi:
+        parser.error("--fitStart must be finite and inside the measured POI fit range")
 rRanges = "r_ttH=%g,%g:r_tHq=%g,%g" % (opts.rMinTtH, opts.rMaxTtH, opts.rMinTHq, opts.rMaxTHq)
 
 print()
@@ -279,9 +285,11 @@ if opts.fits:
     for ipdf, pdfName in indexNameMap.items():
         name = shortName(pdfName)
         for (ttH, tHq) in gridPoints:
+            start = {'r_ttH': ttH, 'r_tHq': tHq}
+            start[opts.poi] = opts.fitStart
             fitCmdBase = ('combine -m %.4f -d %s -M MultiDimFit -P %s --algo singles '
                          '--floatOtherPOIs %d --saveInactivePOI 1 --setParameters r_ttH=%g,r_tHq=%g --setParameterRanges %s %s'
-                         % (opts.mH, shlex.quote(opts.datacard), opts.poi, opts.floatOtherPOIs, ttH, tHq, rRanges, opts.combineOptions))
+                         % (opts.mH, shlex.quote(opts.datacard), opts.poi, opts.floatOtherPOIs, start['r_ttH'], start['r_tHq'], rRanges, opts.combineOptions))
             if opts.split is not None and opts.nToys > opts.split:
                 for isplit in range(opts.nToys // opts.split):
                     fitCmd = fitCmdBase + (' -t %g -n _%s_%s_%s_split%g --toysFile=%s'
