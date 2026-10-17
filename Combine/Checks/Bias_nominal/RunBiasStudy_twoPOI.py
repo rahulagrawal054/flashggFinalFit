@@ -49,6 +49,8 @@ parser.add_option("--gridTHq", default=None, help="Independent injected r_tHq gr
 parser.add_option("--poi", default=None, choices=POIS,
                    help="POI to fit/plot in this call: one of %s. Required for --fits "
                         "and --plots; run the script twice to cover both POIs." % POIS)
+parser.add_option("--floatOtherPOIs", default=1, type="int",
+                  help="1 profiles the other POI; 0 fixes it to its injected value (default: %default)")
 parser.add_option("-m", "--mH", default=125.08, type="float")
 parser.add_option("-c", "--combineOptions",
                   default="--cminDefaultMinimizerStrategy 0 "
@@ -78,6 +80,8 @@ if opts.nToys <= 0 or (opts.split is not None and opts.split <= 0):
     parser.error("nToys and split must be positive")
 if opts.seed < 0:
     parser.error("Use an explicit nonnegative seed, identical for all stages")
+if opts.floatOtherPOIs not in (0, 1):
+    parser.error("floatOtherPOIs must be 0 or 1")
 if opts.rMinTtH >= opts.rMaxTtH or opts.rMinTHq >= opts.rMaxTHq:
     parser.error("Each fit range minimum must be below its maximum")
 
@@ -109,6 +113,40 @@ def move_output(pattern, destination):
     if len(matches) != 1:
         raise RuntimeError("Expected exactly one output for %s, found %s" % (pattern, matches))
     shutil.move(matches[0], destination)
+
+
+def validate_plot_fit_settings(logs, options):
+    """Reject mislabeled plotting settings when original commands are available."""
+    verified = 0
+    expected_ranges = {"r_ttH": [options.rMinTtH, options.rMaxTtH],
+                       "r_tHq": [options.rMinTHq, options.rMaxTHq]}
+    for log in logs:
+        sidecar = log.with_suffix('.command.json')
+        if not sidecar.exists():
+            print("[WARNING] Missing fit command sidecar: %s; plot settings are unverified" % sidecar)
+            continue
+        command = json.loads(sidecar.read_text())["command"]
+        def value(flag):
+            for i, token in enumerate(command):
+                if token == flag:
+                    return command[i + 1]
+                if token.startswith(flag + '='):
+                    return token.split('=', 1)[1]
+            raise RuntimeError("Missing %s in %s; cannot verify plot settings" % (flag, sidecar))
+        ranges = {}
+        for item in value('--setParameterRanges').split(':'):
+            name, bounds = item.split('=', 1)
+            ranges[name] = [float(x) for x in bounds.split(',')]
+        for poi, bounds in expected_ranges.items():
+            if ranges.get(poi) != bounds:
+                raise RuntimeError("Plot range for %s %s differs from saved fit range %s in %s; repeat the fit range options" %
+                                   (poi, bounds, ranges.get(poi), sidecar))
+        mode = int(value('--floatOtherPOIs'))
+        if mode != options.floatOtherPOIs:
+            raise RuntimeError("Plot --floatOtherPOIs %s differs from saved fit value %s in %s; repeat the fit option" %
+                               (options.floatOtherPOIs, mode, sidecar))
+        verified += 1
+    return verified == len(logs)
 
 
 if opts.split is not None and opts.nToys > opts.split and not opts.nToys % opts.split == 0:
@@ -235,8 +273,8 @@ if opts.fits:
         name = shortName(pdfName)
         for (ttH, tHq) in gridPoints:
             fitCmdBase = ('combine -m %.4f -d %s -M MultiDimFit -P %s --algo singles '
-                         '--floatOtherPOIs 1 --setParameters r_ttH=%g,r_tHq=%g --setParameterRanges %s %s'
-                         % (opts.mH, shlex.quote(opts.datacard), opts.poi, ttH, tHq, rRanges, opts.combineOptions))
+                         '--floatOtherPOIs %d --saveInactivePOI 1 --setParameters r_ttH=%g,r_tHq=%g --setParameterRanges %s %s'
+                         % (opts.mH, shlex.quote(opts.datacard), opts.poi, opts.floatOtherPOIs, ttH, tHq, rRanges, opts.combineOptions))
             if opts.split is not None and opts.nToys > opts.split:
                 for isplit in range(opts.nToys // opts.split):
                     fitCmd = fitCmdBase + (' -t %g -n _%s_%s_%s_split%g --toysFile=%s'
@@ -261,6 +299,12 @@ if opts.plots and not opts.dryRun:
         name = shortName(pdfName)
         for (ttH, tHq) in gridPoints:
             truth = ttH if opts.poi == 'r_ttH' else tHq
+            prefix = '_%s_%s_%s' % (name, gridTag(ttH, tHq), opts.poi)
+            logs = [Path('BiasLogs') / (prefix + '.log')]
+            if opts.split is not None and opts.nToys > opts.split:
+                logs = [Path('BiasLogs') / (prefix + '_split%d.log' % i)
+                        for i in range(opts.nToys // opts.split)]
+            plotSettingsVerified = validate_plot_fit_settings(logs, opts)
             tfile = r.TFile(fitName(name, ttH, tHq, opts.poi))
             if not tfile or tfile.IsZombie():
                 raise RuntimeError('Cannot open fit file')
@@ -329,11 +373,6 @@ if opts.plots and not opts.dryRun:
             missing = max(0, opts.nToys - entries // 3)
             logRecords, warningCounts = [], Counter()
             version = None
-            prefix = '_%s_%s_%s' % (name, gridTag(ttH, tHq), opts.poi)
-            logs = [Path('BiasLogs') / (prefix + '.log')]
-            if opts.split is not None and opts.nToys > opts.split:
-                logs = [Path('BiasLogs') / (prefix + '_split%d.log' % i)
-                        for i in range(opts.nToys // opts.split)]
             for logPath in logs:
                 record = {"log": str(logPath.resolve()), "exists": logPath.exists()}
                 sidecar = logPath.with_suffix('.command.json')
@@ -384,7 +423,9 @@ if opts.plots and not opts.dryRun:
                              "mass": opts.mH, "fitOptions": opts.combineOptions,
                              "fitRanges": {"r_ttH": [opts.rMinTtH, opts.rMaxTtH],
                                            "r_tHq": [opts.rMinTHq, opts.rMaxTHq]},
-                             "otherPoiProfiled": True, "toysNoSystematics": True,
+                             "otherPoiProfiled": bool(opts.floatOtherPOIs),
+                             "floatOtherPOIs": opts.floatOtherPOIs,
+                             "fitSettingsVerified": plotSettingsVerified, "toysNoSystematics": True,
                              "nToysRequested": opts.nToys, "split": opts.split,
                              "settingsSource": "plot invocation; command sidecars are authoritative when present"},
                 "fitFile": str(Path(fitName(name, ttH, tHq, opts.poi)).resolve()),
