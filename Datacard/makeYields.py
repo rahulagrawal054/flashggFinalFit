@@ -20,7 +20,7 @@ from commonTools import *
 print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
   print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
-  exit(0)
+  sys.exit(1)  # Called only by input-validation failures in this script.
 
 def get_options():
   parser = OptionParser()
@@ -262,6 +262,8 @@ for ir,r in data[data['type']=='sig'].iterrows():
       else: y_COWCorr += w*(f_NNLOPS/f_COWCorr)
   data.at[ir,'nominal_yield'] = y
   data.at[ir,'sumw2'] = sumw2
+  # Raw entry count is required even when no factory systematics are requested.
+  data.at[ir,'numEvents'] = rdata_nominal.numEntries()
   if not opt.skipCOWCorr: data.at[ir,'nominal_yield_COWCorr'] = y_COWCorr
 
   # Systematics: loop over systematics and use function to extract yield variations
@@ -286,7 +288,6 @@ for ir,r in data[data['type']=='sig'].iterrows():
       print(" experimentalFactoryType.items()",  experimentalFactoryType.items())
       print("experimentalSystYields:", experimentalSystYields)
       for s,f in experimentalFactoryType.items():
-        data.at[ir, 'numEvents'] = experimentalSystYields["numEvents"]
         if f in ['a_w','a_h']: 
           for direction in ['up','down']: 
             data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
@@ -308,7 +309,6 @@ for ir,r in data[data['type']=='sig'].iterrows():
       systProcMatch=theoryProcMatch,
     )
     for s,f in theoryFactoryType.items():
-      data.at[ir, 'numEvents'] = theorySystYields["numEvents"]
       if f in ['a_w','a_h']: 
         for direction in ['up','down']: 
           data.at[ir,"%s_%s_yield"%(s,direction)] = theorySystYields["%s_%s"%(s,direction)]

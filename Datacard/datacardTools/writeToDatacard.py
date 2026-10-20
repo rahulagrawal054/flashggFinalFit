@@ -324,6 +324,12 @@ def writeSystematic(f,d,s,options,stxsMergeScheme=None,scaleCorrScheme=None):
 def addSyst(l,v,s,p,c,n):
   #l-systematic line, v-value, s-systematic title, p-proc, c-cat, n-numEvents
   minEventNumber = 100
+  # External theory normalization values do not depend on category MC entries.
+  # Limit this exemption to the six configured JSON-source datacard titles.
+  applyMCEntryCut = s not in {
+    "QCDscale_ggH", "QCDscale_VBF", "QCDscale_VH", "QCDscale_bbH",
+    "pdf_xsec", "alphaS_xsec",
+  }
   # For pooled Higgs+heavy-flavor systematics we already enforce a 40-event
   # threshold across eras; use the same threshold here to avoid double-pruning.
   if ("Higgs_plus_b_syst" in s) or ("Higgs_plus_c_syst" in s):
@@ -359,7 +365,7 @@ def addSyst(l,v,s,p,c,n):
       # Check 1: variation is non-negligible. If not then skip
       if abs(v[0]-1)<0.0005: l += "%-15s "%"-"
       # If number of events smaller than minEventNumber add - to datacard
-      elif (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
+      elif applyMCEntryCut and (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
       # Check 2: variation is not non-positive. Print message and add - to datacard (cleaned later)
       elif v[0] <= 0.: 
         print(" --> [WARNING] systematic %s: non-positive variation for (%s,%s)"%(s,p,c))
@@ -375,7 +381,7 @@ def addSyst(l,v,s,p,c,n):
       # Check 1: variation is non-negligible. If not then skip
       if(abs(v[0]-1)<0.0005)&(abs(v[1]-1)<0.0005): l += "%-15s "%"-"
       # If number of events smaller than minEventNumber add - to datacard
-      elif (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
+      elif applyMCEntryCut and (n < minEventNumber) and (not ('lumi' in s)): l += "%-15s "%"-"
       # Check 2: neither variation is non-positive. If one side is non-positive,
       # mirror the other side to keep a symmetric lnN instead of dropping it.
       elif(v[0] <= 0.)|(v[1] <= 0.):
@@ -389,7 +395,7 @@ def addSyst(l,v,s,p,c,n):
         v1 = _cap_lnN(v[1])
         l += "%-15.3f "%v1
       else: 
-        if (n < minEventNumber) and (not ('lumi' in s)): 
+        if applyMCEntryCut and (n < minEventNumber) and (not ('lumi' in s)):
           l += "%-15s "%"-"
         else:
           v0 = _cap_lnN(v[0])

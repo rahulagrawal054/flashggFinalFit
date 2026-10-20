@@ -48,7 +48,7 @@ parser.add_argument(
     default=None,
     help="If given, append one CSV row per mode/POI combination to this file "
          "(category,poi_test,poi_profile,mode,raw_toys,expected_toys,"
-         "pct_of_expected,dropped_by_zcut,used_in_plot). Header is written "
+         "pct_of_expected,invalid_values,used_in_plot). Header is written "
          "once if the file doesn't already exist."
 )
 
@@ -58,7 +58,7 @@ if args.summaryFile and not os.path.exists(args.summaryFile):
     with open(args.summaryFile, "w") as sf:
         sf.write(
             "category,poi_test,poi_profile,mode,raw_toys,expected_toys,"
-            "missing_toys,pct_of_expected,dropped_by_zcut,used_in_plot\n"
+            "missing_toys,pct_of_expected,invalid_values,used_in_plot\n"
         )
 
 
@@ -94,55 +94,18 @@ print("==============================================")
 # Find ROOT files automatically
 # ============================================================
 
+# Collect every seed rather than replacing earlier files with the last match.
 root_files = {}
-
-for filename in os.listdir(INPUT_DIR):
-
-    if not filename.endswith(".root"):
-        continue
-
-    # Fixed
-    match = re.match(
-        r"higgsCombine_fixed_(r_\w+)_test_(r_\w+)_profile_.*\.Significance\..*\.root",
-        filename
-    )
-
+pattern = re.compile(r"^higgsCombine_(fixed|envelope)_(r_ttH|r_tHq)_test_(r_ttH|r_tHq)_(profiled|profile|fixed)_.*\.Significance\..*\.root$")
+for filename in sorted(os.listdir(INPUT_DIR)):
+    match = pattern.match(filename)
     if match:
-
-        poi_test = match.group(1)
-        poi_profile = match.group(2)
-
-        root_files[
-            ("fixed", poi_test, poi_profile)
-        ] = os.path.join(INPUT_DIR, filename)
-
-        continue
-
-    # Envelope
-    match = re.match(
-        r"higgsCombine_envelope_(r_\w+)_test_(r_\w+)_profile_.*\.Significance\..*\.root",
-        filename
-    )
-
-    if match:
-
-        poi_test = match.group(1)
-        poi_profile = match.group(2)
-
-        root_files[
-            ("envelope", poi_test, poi_profile)
-        ] = os.path.join(INPUT_DIR, filename)
-
-
-print("\nFound files:")
-
-for key, filename in sorted(root_files.items()):
-    print(
-        " ",
-        key,
-        "->",
-        os.path.basename(filename)
-    )
+        mode, target, other, treatment = match.groups()
+        treatment = 'profiled' if treatment == 'profile' else treatment
+        root_files.setdefault((mode, target, other, treatment), []).append(os.path.join(INPUT_DIR, filename))
+if not root_files:
+    raise RuntimeError('No matching significance results found')
+print('Found result groups:', {str(k): len(v) for k,v in root_files.items()})
 
 
 # ============================================================
@@ -156,7 +119,9 @@ p_gaus = np.array([
     for Z in Z_points
 ])
 
-z_thr = 4
+def ratio(a, b):
+    return np.divide(a, b, out=np.full_like(a, np.nan, dtype=float), where=b > 0)
+
 
 
 # ============================================================
@@ -165,15 +130,16 @@ z_thr = 4
 
 def read_significance(filename, label="", cat=None, poi_test=None, poi_profile=None):
 
-    f = uproot.open(filename)
-
-    z_raw = np.array(
-        f["limit"].arrays("limit")["limit"]
-    )
+    arrays = []
+    for path in filename:
+        with uproot.open(path) as f:
+            arrays.append(f["limit"]["limit"].array(library="np"))
+    z_raw = np.concatenate(arrays)
     raw_N = len(z_raw)
 
-    # Remove failed fits
-    z = z_raw[z_raw < z_thr]
+    # Retain all finite nonnegative significances, including genuine high-Z tails.
+    # These value checks cannot certify minimizer convergence: inspect fit logs.
+    z = z_raw[np.isfinite(z_raw) & (z_raw >= 0)]
     dropped_by_cut = raw_N - len(z)
 
     pct = None
@@ -185,7 +151,7 @@ def read_significance(filename, label="", cat=None, poi_test=None, poi_profile=N
         msg += f" ({pct:.1f}% of expected {args.expectedToys}, {missing} missing)"
         if pct < 90:
             msg += "  <-- SHORTFALL, check for failed/missing condor jobs"
-    msg += f"; {dropped_by_cut} removed by z<{z_thr} cut -> {len(z)} used in plot"
+    msg += f"; {dropped_by_cut} nonfinite/negative values excluded -> {len(z)} used in plot"
 
     print(msg)
 
@@ -199,6 +165,10 @@ def read_significance(filename, label="", cat=None, poi_test=None, poi_profile=N
                 f"{dropped_by_cut},{len(z)}\n"
             )
 
+    if len(z) == 0:
+        raise RuntimeError('No usable significances in result group')
+    if dropped_by_cut or (args.expectedToys is not None and raw_N != args.expectedToys):
+        print('WARNING: missing/invalid toys can bias tail rates; curves are conditional on available valid results.')
     return z
 
 
@@ -237,18 +207,20 @@ def calculate_p(z):
 # Make one plot
 # ============================================================
 
-def make_plot(poi_test, poi_profile):
+def make_plot(poi_test, poi_profile, treatment):
 
     fixed_key = (
         "fixed",
         poi_test,
-        poi_profile
+        poi_profile,
+        treatment
     )
 
     envelope_key = (
         "envelope",
         poi_test,
-        poi_profile
+        poi_profile,
+        treatment
     )
 
     if fixed_key not in root_files:
@@ -333,24 +305,24 @@ def make_plot(poi_test, poi_profile):
     # ========================================================
 
     axs[0].plot(
-        Z_points, p_fixed / p_fixed,
+        Z_points, ratio(p_fixed, p_fixed),
         ls="-", color="red", linewidth=2
     )
     axs[0].fill_between(
         Z_points,
-        (p_fixed - err_fixed) / p_fixed,
-        (p_fixed + err_fixed) / p_fixed,
+        ratio((p_fixed - err_fixed), p_fixed),
+        ratio((p_fixed + err_fixed), p_fixed),
         color="salmon", alpha=0.2
     )
 
     axs[0].plot(
-        Z_points, p_envelope / p_fixed,
+        Z_points, ratio(p_envelope, p_fixed),
         ls="-", color="mediumblue", linewidth=2
     )
     axs[0].fill_between(
         Z_points,
-        (p_envelope - err_envelope) / p_fixed,
-        (p_envelope + err_envelope) / p_fixed,
+        ratio((p_envelope - err_envelope), p_fixed),
+        ratio((p_envelope + err_envelope), p_fixed),
         color="cornflowerblue", alpha=0.2
     )
 
@@ -443,9 +415,10 @@ def make_plot(poi_test, poi_profile):
     axs[2].set_yscale("log")
     axs[2].set_ylabel("Type-1 error rate [%]", fontsize=20)
 
+    # Bands show marginal binomial errors, not a paired-toy ratio uncertainty.
     poi_handles = [
         Line2D([0], [0], color="none", label=f"Test POI: {poi_test}"),
-        Line2D([0], [0], color="none", label=f"Profile POI: {poi_profile}"),
+        Line2D([0], [0], color="none", label=f"Other POI: {poi_profile} ({treatment})"),
     ]
     handles, labels = axs[2].get_legend_handles_labels()
     axs[2].legend(
@@ -461,7 +434,7 @@ def make_plot(poi_test, poi_profile):
 
     output_base = (
         f"summary_significance_{category}_"
-        f"test_{poi_test}_profile_{poi_profile}"
+        f"test_{poi_test}_{treatment}_{poi_profile}"
     )
 
     pdf_file = os.path.join(PLOT_DIR, output_base + ".pdf")
@@ -480,8 +453,16 @@ def make_plot(poi_test, poi_profile):
 # EXACTLY TWO PLOTS
 # ============================================================
 
-make_plot("r_ttH", "r_tHq")
-make_plot("r_tHq", "r_ttH")
+groups = sorted({(target, other, treatment) for mode,target,other,treatment in root_files})
+for target, other, treatment in groups:
+    if not all((mode,target,other,treatment) in root_files for mode in ('fixed','envelope')):
+        raise RuntimeError('Missing fixed/envelope result group for '+target)
+    # Require matching ensemble identifiers so the comparison uses the same toys.
+    fixed_ids = {os.path.basename(x).replace('higgsCombine_fixed_', '', 1) for x in root_files[('fixed',target,other,treatment)]}
+    env_ids = {os.path.basename(x).replace('higgsCombine_envelope_', '', 1) for x in root_files[('envelope',target,other,treatment)]}
+    if fixed_ids != env_ids:
+        raise RuntimeError('Fixed/envelope seed or ensemble identifiers differ')
+    make_plot(target, other, treatment)
 
 
 print("\n==============================================")

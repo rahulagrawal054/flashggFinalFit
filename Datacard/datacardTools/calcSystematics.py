@@ -52,6 +52,8 @@ def getValueFromJson(row,uncertainties,sname):
   p = re.sub("_2018_%s"%decayMode,"",p)
   p = re.sub("_2022preEE_%s"%decayMode,"",p)
   p = re.sub("_2022postEE_%s"%decayMode,"",p)
+  p = re.sub("_2023preBPix_%s"%decayMode,"",p)
+  p = re.sub("_2023postBPix_%s"%decayMode,"",p)
   if p in uncertainties:
     # If the proc is known but the systematic is not defined for it, skip it
     if sname not in uncertainties[p]:

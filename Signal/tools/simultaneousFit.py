@@ -18,10 +18,12 @@ pLUT['DCB']['dm_p2'] = [0.0,-0.001,0.001]
 pLUT['DCB']['sigma_p0'] = [2.,1.,20.]
 pLUT['DCB']['sigma_p1'] = [0.0,-0.1,0.1]
 pLUT['DCB']['sigma_p2'] = [0.0,-0.001,0.001]
-pLUT['DCB']['n1_p0'] = [20.,1.00001,500]
+# Keep tail exponents away from n=1 to reduce normalization instability.
+# Check Asimov closure after this change; it is not guaranteed by the bound alone.
+pLUT['DCB']['n1_p0'] = [20.,1.01,500]
 pLUT['DCB']['n1_p1'] = [0.0,-0.1,0.1]
 pLUT['DCB']['n1_p2'] = [0.0,-0.001,0.001]
-pLUT['DCB']['n2_p0'] = [20.,1.00001,500]
+pLUT['DCB']['n2_p0'] = [20.,1.01,500]
 pLUT['DCB']['n2_p1'] = [0.0,-0.1,0.1]
 pLUT['DCB']['n2_p2'] = [0.0,-0.001,0.001]
 pLUT['DCB']['a1_p0'] = [1.,1.,10.]
@@ -342,9 +344,19 @@ class SimultaneousFit:
 
     # Run fit
     if self.verbose: print(" --> (%s) Running fit"%self.name)
-    self.FitResult = minimize(nChi2Addition,x0,args=self,bounds=xbounds,method=self.minimizerMethod)
-    self.Chi2 = self.getChi2()
-    #self.Chi2 = nChi2Addition(self.FitResult['x'],self)
+    # TNC's default evaluation budget is too small for these mixtures.
+    options = {'maxfun': 20000} if self.minimizerMethod.upper() == 'TNC' else {}
+    self.FitResult = minimize(nChi2Addition,x0,args=self,bounds=xbounds,method=self.minimizerMethod,tol=self.minimizerTolerance,options=options)
+    # Restore the returned optimum: objective evaluations mutate the RooVars.
+    self.Chi2 = nChi2Addition(self.FitResult.x,self)
+    print(" --> (%s) Optimizer: success=%s, status=%s, message=%s"%(self.name,self.FitResult.success,self.FitResult.status,self.FitResult.message))
+    for i, value in enumerate(self.FitResult.x):
+      parameter = self.FitParameters[i]
+      if parameter.GetName() == self.MH.GetName(): continue
+      low, high = xbounds[i]
+      tolerance = 1.e-5 * max(1., abs(high-low))
+      if abs(value-low) <= tolerance or abs(value-high) <= tolerance:
+        print(" --> [WARNING] (%s) Parameter at boundary: %s = %.9g, range=[%.9g, %.9g]"%(self.name,parameter.GetName(),value,low,high))
     # Print parameter post-fit values
     if self.verbose: self.printFitParameters(title="Post-fit")
 

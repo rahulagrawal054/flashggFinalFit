@@ -1,0 +1,148 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{frametitle}{fg=blue!60!black}
+\setbeamertemplate{footline}[frame number]
+\title{DCB+Gaussian versus sum of Gaussians}
+\subtitle{Signal-model checks and smearing response: provisional comparison}
+\date{19 October 2026}
+\begin{document}
+\begin{frame}{How should we choose the signal PDF?}
+\textbf{Choose from agreement with signal simulation and fit stability.}
+\begin{itemize}
+\item Compare the same process, category and era at the generated MC mass, $m_H=125$ GeV; inspect the peak, tails, residuals, convergence and boundaries.
+\item A goodness-of-fit probability needs a calibrated statistic, with weighted MC uncertainties and fitted parameters accounted for. Our summed diagnostic $\chi^2$ values are not calibrated model-selection tests.
+\item Expected sensitivity is a consequence to compare, not the selection criterion.
+\item If both families adequately describe MC, DCB+Gaussian is a reasonable simpler workflow: it avoids selecting the number of Gaussians with the SoG F-test. This does not imply fewer fitted coefficients in every case.
+\end{itemize}
+\small Existing all-era aggregate diagnostic: lower $\chi^2$ for DCB in 7 categories and SoG in 9; no universal winner. Component failures can be hidden by a good-looking sum.
+\vfill\tiny Source: Signal/packaged\_all\_years\_20261014/README\_MH125.md and aggregate\_comparison\_MH125.csv.
+\end{frame}
+
+% BEGIN SHAPE EXAMPLES
+\begin{frame}{Visible shape difference: tH\_had\_4, 2023postBPix}
+\begin{columns}[T]
+\column{0.49\textwidth}\centering\textbf{DCB+Gaussian}\\
+\includegraphics[height=0.66\textheight]{../runplotter_individual_years_20261014/DCB/2023postBPix/Plots/smodel_tH_had_4_2023postBPix.png}
+\column{0.49\textwidth}\centering\textbf{Sum of Gaussians}\\
+\includegraphics[height=0.66\textheight]{../runplotter_individual_years_20261014/SoG/2023postBPix/Plots/smodel_tH_had_4_2023postBPix.png}
+\end{columns}
+\small SoG shows a shoulder near 128 GeV; DCB has a smoother falling tail. This motivates component-level checks; sparse MC does not establish that every shoulder is unphysical.
+\vfill\tiny Matched era/category; sum of processes, $M_H=m_H^{MC}=125$ GeV, nominal nuisances, 0.1\% display pruning. The smoothness comparison is not a calibrated goodness-of-fit verdict. Source: runplotter\_individual\_years\_20261014.
+\end{frame}
+\begin{frame}{Visible shape difference: tH\_had\_3, 2023postBPix}
+\begin{columns}[T]
+\column{0.49\textwidth}\centering\textbf{DCB+Gaussian}\\
+\includegraphics[height=0.66\textheight]{../runplotter_individual_years_20261014/DCB/2023postBPix/Plots/smodel_tH_had_3_2023postBPix.png}
+\column{0.49\textwidth}\centering\textbf{Sum of Gaussians}\\
+\includegraphics[height=0.66\textheight]{../runplotter_individual_years_20261014/SoG/2023postBPix/Plots/smodel_tH_had_3_2023postBPix.png}
+\end{columns}
+\small SoG has a flatter peak and a low-side shoulder; DCB has a smoother dominant peak. Similar effective widths (2.06 versus 2.05 GeV) do not imply identical local shapes.
+\vfill\tiny Matched era/category and plotting prescription as preceding slide. These are process sums, not individual fit curves; their appearance alone does not identify a failed donor or prove model adequacy. Source: runplotter\_individual\_years\_20261014.
+\end{frame}
+\begin{frame}{A documented poor SoG solution: inspect residuals and fit status}
+\begin{columns}
+\column{0.66\textwidth}
+\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{../shape_review_20261014/2022preEE_bbh_in_tH_lep_2.png}
+\column{0.32\textwidth}\small
+2022preEE, recipient \texttt{bbh\_in / tH\_lep\_2}; both borrow \texttt{tth\_in / tH\_lep\_2}.
+\begin{itemize}
+\item SoG peak shifts relative to donor MC; structured residuals reach about 5--7 error units.
+\item Logged $\chi^2/\mathrm{ndof}$: DCB 1.050; SoG 14.317.
+\item DCB optimizer converged, with two bound flags; SoG optimizer failed.
+\end{itemize}
+\textbf{Conclusion:} the returned SoG solution needs correction; this does not show that a converged SoG cannot fit this shape.
+\end{columns}
+\vfill\tiny Normalized donor-shape comparison at $M_H=125$ GeV; not a recipient-yield comparison. Reduced $\chi^2$ is diagnostic, not a calibrated p-value. Source: shape\_review\_20261014/selected\_shapes.json and README.md.
+\end{frame}
+\begin{frame}{Keep the comparison balanced: a case where SoG is better}
+\begin{columns}
+\column{0.66\textwidth}
+\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{../shape_review_20261014/2023postBPix_tHW_in_ttH_lep_1.png}
+\column{0.32\textwidth}\small
+2023postBPix, \texttt{tHW\_in / ttH\_lep\_1}.
+\begin{itemize}
+\item Both optimizers converged.
+\item SoG follows the MC peak and residuals more closely in this example.
+\item Logged $\chi^2/\mathrm{ndof}$: DCB 2.379; SoG 0.655.
+\item DCB has two bound flags; SoG has none.
+\end{itemize}
+\textbf{Selection principle:} review fit quality, convergence and tails across matched components; do not select by sensitivity or visual smoothness alone.
+\end{columns}
+\vfill\tiny Selected illustrative cases are not an unbiased survey of model quality. Source: shape\_review\_20261014/selected\_shapes.json. Existing examples do not establish a universal winning family.
+\end{frame}
+% END SHAPE EXAMPLES
+
+\begin{frame}{How does the smearing nuisance change the signal shape?}
+\begin{columns}
+\column{0.64\textwidth}
+\includegraphics[width=\linewidth,height=0.73\textheight,keepaspectratio]{../smearing_pdf_scan_20261015/2023preBPix_peak.png}
+\column{0.34\textwidth}
+\small Matched example: \texttt{tth\_in}, \texttt{ttH\_had\_1}, 2023preBPix; $M_H=125.09$ GeV.
+\begin{itemize}
+\item Both nominal optimizers converged in this example.
+\item At $\theta=\pm1$, widths change by $\pm4.36\%$ in both families; there is also a small mean response ($\sim0.037$ GeV).
+\item Tail coefficients and mixture fractions are not refitted or directly varied by this nuisance.
+\item PDF response is distinct from the profiled signal-strength impact.
+\end{itemize}
+\end{columns}
+\tiny A SoG with distinct component means need not be symmetric. DCB tails allow left/right differences; neither family guarantees symmetric or asymmetric impacts. Source: smearing\_pdf\_scan\_20261015/README.md; tools/finalModel.py, buildSigma/buildMean.
+\end{frame}
+\begin{frame}{Historical DCB change: a separate question}
+\small
+\begin{center}
+\begin{tabular}{lrrr}\toprule
+Result & $\Delta r_{ttH}(\theta_-)$ & $\Delta r_{ttH}(\theta_+)$ & Rank\\\midrule
+Earlier DCB & -0.0180 & +0.0313 & 6 \\
+Current DCB & -0.0192 & +0.0183 & 4 \\
+\bottomrule\end{tabular}
+\end{center}
+\begin{itemize}
+\item The current DCB impact is nearly symmetric and fourth among the 91 collected constrained nuisances. The earlier result is more asymmetric.
+\item Ranking depends on all other impacts too. These numbers do not establish why the result changed; earlier and current fit setups are not assumed identical.
+\item Run fresh SoG Combine fits with matched mass, POIs, data-generation prescription, constraints, background envelope, pruning and numerical settings. Check Asimov closure and fit quality before comparing impacts.
+\item Compare absolute up/down shifts, nuisance pulls/constraints and the PDF response, not just the ranking. For expected sensitivity, a shared reference Asimov dataset is useful to separate shape-model changes from changes in generated data.
+\end{itemize}
+\textbf{Update:} current SoG results follow. A controlled explanation of the historical DCB change remains pending.
+\vfill\tiny Current DCB caveat: initial snapshot status 1, covariance quality 2; one impact log also needs stability review. Source: Combine/DCB/impacts/collected\_20261017/impacts.json and README.md; earlier raw JSON in Combine/15OCT26/DCB\_0p001/.
+\end{frame}
+
+% BEGIN CURRENT COMBINE COMPARISON
+\begin{frame}{Current impacts: smearing is fourth for ttH in both families}
+\begin{center}\small
+\begin{tabular}{llrrr}\toprule
+POI & Model & Lower-endpoint shift & Upper-endpoint shift & Rank\\\midrule
+r\_ttH & DCB & -0.0192 & +0.0183 & 4 \\
+r\_ttH & SoG & -0.0178 & +0.0172 & 4 \\
+r\_tHq & DCB & -0.0669 & +0.0751 & 12 \\
+r\_tHq & SoG & -0.0551 & +0.0666 & 13 \\
+\bottomrule\end{tabular}\end{center}
+\begin{center}\includegraphics[width=0.87\linewidth,height=0.40\textheight,keepaspectratio]{smearing_impact_comparison.png}\end{center}
+\small Both ttH impacts are nearly symmetric; DCB is modestly larger. This result does not support a general rule that SoG impacts must be symmetric and DCB impacts asymmetric.
+\vfill\tiny All 91 constrained nuisances collected in each model, other strength profiled. Endpoints use fitted nuisance intervals, not the bare conditional shape scan. Original JSON values retained; no nuisance removal or recentering.
+\end{frame}
+\begin{frame}{Expected profile scans: very similar over the relevant intervals}
+\begin{center}\includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{combine_scan_comparison.png}\end{center}
+\small Solid: total uncertainties. Dashed: stat only. Raw likelihoods; invalid DCB tail points omitted without bridging gaps. SoG refined scans have no invalid grid points.
+\vfill\tiny Displayed ranges overlap; scan grids differ. Each family uses its own saved SM-injected Asimov. Snapshot status/covariance warnings remain; these are provisional expected comparisons, not a common-dataset closure test.
+\end{frame}
+\begin{frame}{Numerical comparison and what it establishes}
+\begin{center}\small
+\begin{tabular}{lcccc}\toprule
+Model & ttH total 68\% interval & tHq total 68\% interval & ttH $Z$ & tHq median limit\\\midrule
+DCB & [0.615, 1.535] & [-3.507, 6.535] & 2.827 & 11.445 \\
+SoG & [0.615, 1.534] & [-3.504, 6.531] & 2.831 & 11.445 \\
+\bottomrule\end{tabular}\end{center}
+\begin{itemize}
+\item Expected POI intervals, significances and the reported tHq upper limit are nearly unchanged. The limit is a dimensionless strength, at 95\% CLs.
+\item Smearing is fourth for ttH in both models. Its smaller SoG impact does not by itself select the preferred signal PDF.
+\item Base PDF choice on signal-MC agreement and stability. The shown SoG shape failures and DCB counterexamples need component-level review.
+\item Remaining qualifications: DCB snapshot status 1/covariance 2; SoG status 3/covariance 3. Both best fits are near $(1.042,1.020)$, rather than exact closure at $(1,1)$.
+\item These are matched-workflow, separate-Asimov results. A shared reference dataset is still needed to isolate the fitted-family effect; the cause of the historical DCB impact change is not established.
+\end{itemize}
+\vfill\tiny Sources: Combine/DCB and Combine/SoG saved scan summaries, significance/limit results and collected impacts; reproducible table inputs in combine\_comparison.json.
+\end{frame}
+% END CURRENT COMBINE COMPARISON
+
+\end{document}

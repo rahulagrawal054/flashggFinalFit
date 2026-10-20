@@ -322,7 +322,7 @@ fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets
 foutDir = "%s/outdir_%s/signalFit/output"%(opt.outputDir,opt.ext)
 foutName = "%s/outdir_%s/signalFit/output/CMS-HGG_sigfit_%s_%s_%s_%s.root"%(opt.outputDir,opt.ext,opt.ext,opt.proc,opt.year,opt.cat)
 print("\n --> Saving output workspace to file: %s"%foutName)
-if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
+os.makedirs(foutDir, exist_ok=True)
 fout = ROOT.TFile(foutName,"RECREATE")
 outWS = ROOT.RooWorkspace("%s_%s"%(outputWSName__,sqrts__),"%s_%s"%(outputWSName__,sqrts__))
 fm.save(outWS)
@@ -332,16 +332,36 @@ fout.Close()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PLOTTING
 if opt.doPlots:
-  try:
-    print("\n --> Making plots...")
-    if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext))
-    if opt.skipVertexScenarioSplit:
-      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="total_",_proc=procRVFit,_cat=catRVFit) 
-    if not opt.skipVertexScenarioSplit:
-      plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="RV_",_proc=procRVFit,_cat=catRVFit) 
-      plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_extension="WV_",_proc=procWVFit,_cat=catRVFit) 
-    # Plot interpolation
-    plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)) 
-    plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext),_nominalMass=MHNominal) 
-  except:
-    print("\n --> Creating plots unsuccessful. (Probably due to a empty bin.)")
+  import traceback
+  plotDir = "%s/outdir_%s/signalFit/Plots"%(opt.outputDir,opt.ext)
+  os.makedirs(plotDir, exist_ok=True)
+  print("\n --> Making plots...")
+  # Each diagnostic reports its own exception so others can still be produced.
+  def makePlot(label, function, *args, **kwargs):
+    try:
+      function(*args, **kwargs)
+    except Exception:
+      print(" --> [ERROR] Plotting failed: %s"%label)
+      traceback.print_exc()
+
+  if opt.skipVertexScenarioSplit:
+    makePlot("total fitted-shape components", plotPdfComponents, ssfRV,
+             _outdir=plotDir, _extension="total_", _proc=procRVFit, _cat=catRVFit,
+             _recipientProc=opt.proc, _recipientCat=opt.cat, _year=opt.year)
+  else:
+    makePlot("RV fitted-shape components", plotPdfComponents, ssfRV,
+             _outdir=plotDir, _extension="RV_", _proc=procRVFit, _cat=catRVFit,
+             _recipientProc=opt.proc, _recipientCat=opt.cat, _year=opt.year)
+    makePlot("WV fitted-shape components", plotPdfComponents, ssfWV,
+             _outdir=plotDir, _extension="WV_", _proc=procWVFit, _cat=catWVFit,
+             _recipientProc=opt.proc, _recipientCat=opt.cat, _year=opt.year)
+
+  if len(opt.massPoints.split(",")) > 1:
+    if nominalDatasets[MHNominal].numEntries() >= opt.replacementThreshold and nominalDatasets[MHNominal].sumEntries() > 0:
+      makePlot("mass interpolation", plotInterpolation, fm, _outdir=plotDir)
+    else:
+      print(" --> Skipping mass-interpolation plot: insufficient nominal MC for comparison")
+  else:
+    print(" --> Skipping model_vs_mH plot: only one generated mass point")
+
+  print(" --> Skipping normalization-spline plots: disabled")

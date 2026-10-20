@@ -201,7 +201,17 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Signal fit plots
 # Plot final pdf at MH = 125 (with data) + individual Pdf components
-def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
+def componentPlotStem(_extension, _proc, _cat, _recipientProc='', _recipientCat='', _year=''):
+  recipientProc, recipientCat = _recipientProc or _proc, _recipientCat or _cat
+  stem = "%sshape_pdf_components_%s_%s"%(_extension, recipientProc, recipientCat)
+  if _year: stem += "_%s"%_year
+  if (recipientProc, recipientCat) != (_proc, _cat):
+    stem += "_from_%s_%s"%(_proc, _cat)
+  return stem
+
+
+def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',
+                      _recipientProc='',_recipientCat='',_year=''):
   canv = ROOT.TCanvas()
   canv.SetLeftMargin(0.1)
   ssf.MH.setVal(125)
@@ -229,6 +239,8 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   #hists['data'].GetXaxis().SetRangeUser(115,140)
   hists['data'].GetXaxis().SetRangeUser(100,150)
   hists['data'].Scale(float(ssf.nBins)/1600)
+  hists['data'].GetYaxis().SetTitle("Normalized distribution (a.u.)")
+  hists['data'].GetYaxis().SetTitleOffset(1.05)
   hists['data'].SetMarkerStyle(20)
   hists['data'].SetMarkerColor(1)
   hists['data'].SetLineColor(1)
@@ -264,7 +276,7 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   leg.SetFillStyle(0)
   leg.SetLineColor(0)
   leg.SetTextSize(0.04)
-  leg.AddEntry(hists['data'],"Simulation","ep")
+  leg.AddEntry(hists['data'],"Simulation: %s"%_proc,"ep")
   leg.AddEntry(hists['final'],"Parametric Model","L")
   leg.Draw("Same")
   if len(pdfs.keys())!=1:
@@ -280,7 +292,19 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   lat.SetTextAlign(31)
   lat.SetNDC()
   lat.SetTextSize(0.03)
-  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(ssf.name,_proc,_cat))
+  recipientProc, recipientCat = _recipientProc or _proc, _recipientCat or _cat
+  borrowed = (recipientProc, recipientCat) != (_proc, _cat)
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(ssf.name,recipientProc,recipientCat))
+  donorLabel = ROOT.TLatex()
+  donorLabel.SetTextFont(42)
+  donorLabel.SetTextAlign(11)
+  donorLabel.SetNDC()
+  donorLabel.SetTextSize(0.026)
+  if borrowed:
+    donorLabel.DrawLatex(0.13,0.85,"Shape donor: %s / %s"%(_proc,_cat))
+    donorLabel.DrawLatex(0.13,0.81,"Points and #chi^{2}: donor MC fit")
+  else:
+    donorLabel.DrawLatex(0.13,0.85,"Shape fitted to own MC")
   lat1 = ROOT.TLatex()
   lat1.SetTextFont(42)
   lat1.SetTextAlign(11)
@@ -291,8 +315,9 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat=''):
   drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
-  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.png"%(_outdir,_extension,_proc,_cat))
-  canv.SaveAs("%s/%sshape_pdf_components_%s_%s.pdf"%(_outdir,_extension,_proc,_cat))
+  stem = componentPlotStem(_extension, _proc, _cat, _recipientProc, _recipientCat, _year)
+  canv.SaveAs("%s/%s.png"%(_outdir,stem))
+  canv.SaveAs("%s/%s.pdf"%(_outdir,stem))
 
 # Plot final pdf for each mass point
 def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130'):

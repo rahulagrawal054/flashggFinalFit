@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -eo pipefail
+cd /eos/home-r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+eval "$(scram runtime -sh)"
+source ../setup.sh
+mkdir /eos/home-r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/DCB/impacts/stability_Higgs_plus_c_syst_ggH_strategy1
+cd /eos/home-r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/DCB/impacts/stability_Higgs_plus_c_syst_ggH_strategy1
+combine -M MultiDimFit /eos/home-r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/DCB/snapshot/higgsCombine_Fiducial_AsimovPostfit.MultiDimFit.mH125.09.123456.root --snapshotName MultiDimFit -m 125.09 -t -1 --toysFile /eos/home-r/rkumarag/CMSSW_14_1_0_pre4/src/flashggFinalFit/Combine/DCB/snapshot/higgsCombine_Fiducial_AsimovPostfit.MultiDimFit.mH125.09.123456.root --algo impact --redefineSignalPOIs r_ttH,r_tHq --floatOtherPOIs 1 --saveInactivePOI 1 --setParameters MH=125.09 --freezeParameters MH --robustFit 1 --cminDefaultMinimizerStrategy 1 --cminDefaultMinimizerTolerance 0.01 --setRobustFitStrategy 1 --setRobustFitTolerance 0.01 --stepSize 0.05 --setCrossingTolerance 0.00005 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -v 3 --setParameterRanges r_ttH=-1,3:r_tHq=-25,25 --saveSpecifiedIndex pdfindex_bkg_had_13TeV,pdfindex_bkg_lep_13TeV,pdfindex_tH_had_1_13TeV,pdfindex_tH_had_2_13TeV,pdfindex_tH_had_3_13TeV,pdfindex_tH_had_4_13TeV,pdfindex_tH_lep_1_13TeV,pdfindex_tH_lep_2_13TeV,pdfindex_ttH_had_1_13TeV,pdfindex_ttH_had_2_13TeV,pdfindex_ttH_had_3_13TeV,pdfindex_ttH_had_4_13TeV,pdfindex_ttH_lep_1_13TeV,pdfindex_ttH_lep_2_13TeV,pdfindex_ttH_lep_3_13TeV,pdfindex_ttH_lep_4_13TeV -P CMS_hgg_Higgs_plus_c_syst_ggH -n _stability_Higgs_plus_c_syst_ggH_strategy1 2>&1 | tee fit.log
