@@ -137,3 +137,29 @@ __pycache__/
 /Signal/comparison_slides_20261019/meeting_inputs/
 /Signal/comparison_slides_20261019/meeting_DCB_SoG_20261020.tex
 /Signal/comparison_slides_20261019/postfit_asimov_results.tex
+
+# Generated meeting follow-up figures and expected-result comparisons
+/Signal/meeting_followup_20261022/
+/Combine/postfit_expected_comparison.json
+
+/Signal/meeting_followup_slides_20261022/
+
+/Signal/runplotter_poi_groups_20261022/
+
+/Signal/species_statistics_study_20261022/
+
+# Versioned 2022-2023 signal production outputs
+/Signal/outdir_2022_2023_v001/
+
+/Signal/outdir_package_2022_2023_v001/
+
+# Local presentation/review artifacts; preserve only reproducible fit-check source
+/my_checks/
+/Combine/Checks/inclusive_significance_20261105/*
+!/Combine/Checks/inclusive_significance_20261105/run_*.py
+
+# Additional generated presentation and image formats
+*.webp
+*.tif
+*.tiff
+*.pptx
