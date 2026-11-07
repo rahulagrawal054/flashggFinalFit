@@ -43,12 +43,22 @@ for model in ('DCB','SoG'):
     copy_tree(source/'snapshot/validation.json',dest/'checks/snapshot')
     for folder in source.glob('yield_tables*'):
         copy_tree(folder,dest/folder.name)
-slides=BASE.parent/'Signal/comparison_slides_20261019'
+def signal_study(name):
+    # Signal review outputs may have been moved out of the production directory.
+    for root in (BASE.parent/'Signal', BASE.parent/'my_checks',
+                 BASE.parent/'my_checks/SignalShape_Chi2Comparison'):
+        candidate=root/name
+        if candidate.exists():return candidate
+    return BASE.parent/'Signal'/name
+
+slides=signal_study('comparison_slides_20261019')
 for name in ('signal_model_comparison.pdf','combine_scan_comparison.png','combine_scan_comparison.pdf','smearing_impact_comparison.png','smearing_impact_comparison.pdf','combine_comparison.json','meeting_DCB_SoG_20261020.pdf','postfit_asimov_comparison.png','postfit_asimov_comparison.pdf','postfit_asimov_comparison.json'):
     copy_tree(slides/name,DEST/'Comparison')
 signal=BASE.parent/'Signal'
-for source_name,public_name in [('runplotter_individual_years_20261014','IndividualYears'),('shape_review_20261014','ModelComparison'),('smearing_pdf_scan_20261015','Smearing')]:
-    copy_tree(signal/source_name,DEST.parent/'Signal'/public_name)
+for source_name,public_name in [('runplotter_individual_years_20261014','IndividualYears'),('shape_review_20261014','ModelComparison'),('smearing_pdf_scan_20261015','Smearing'),('meeting_followup_20261022','POIComponents'),('runplotter_poi_groups_20261022','POIComponents/RunPlotter'),('species_statistics_study_20261022','SpeciesStudy')]:
+    copy_tree(signal_study(source_name),DEST.parent/'Signal'/public_name)
+for name in ('nuisance_values_method1_vs_method2.pdf','signal_only_model_comparison.pdf'):
+    copy_tree(signal_study('meeting_followup_slides_20261022')/name,DEST.parent/'Signal/POIComponents/Slides')
 copy_tree(slides/'meeting_inputs',DEST/'Comparison/meeting_inputs')
 (DEST/'publication_manifest.json').write_text(json.dumps({'files':records,'qualification':'Provisional separate-model Asimov results. Snapshot status/covariance and internal fit warnings remain. Archived old_16OCT unchanged.'},indent=2)+'\n')
 style='''body{font:16px system-ui,sans-serif;max-width:1300px;margin:30px auto;padding:0 20px;color:#172534}a{color:#165ca0}h1{font-size:27px}.note{padding:15px;background:#fff3d4;border-left:4px solid #be8c18}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}figure{margin:0;padding:12px;border:1px solid #dce3eb;border-radius:6px}img{width:100%;height:300px;object-fit:contain;background:white}figcaption{overflow-wrap:anywhere}li{margin:8px 0}.dirs{display:flex;flex-wrap:wrap;gap:12px}.dirs a{padding:10px;background:#eef4fa;border-radius:4px}'''
