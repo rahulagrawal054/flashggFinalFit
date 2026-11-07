@@ -1,1 +1,0 @@
-SoG/config_2023preBPix_fiducial_SoG.py

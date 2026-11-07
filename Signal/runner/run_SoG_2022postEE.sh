@@ -1,1 +1,0 @@
-SoG/run_SoG_2022postEE.sh

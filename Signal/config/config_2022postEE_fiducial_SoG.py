@@ -1,1 +1,0 @@
-SoG/config_2022postEE_fiducial_SoG.py

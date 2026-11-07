@@ -1,1 +1,0 @@
-DCB/config_2022preEE_fiducial_DCB.py
