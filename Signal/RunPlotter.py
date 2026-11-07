@@ -28,6 +28,8 @@ def get_options():
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
   parser.add_option("--translateProcs", dest="translateProcs", default=None, help="JSON to store proc translations")
   parser.add_option("--label", dest="label", default='Simulation Preliminary', help="CMS Sub-label")
+  parser.add_option("--procLabel", dest="procLabel", default=None, help="Display label for selected processes; does not change selection or filenames")
+  parser.add_option("--fitChi2", dest="fitChi2", default=None, help="JSON with original per-era fit chi2/ndof for a single selected process")
   parser.add_option("--doFWHM", dest="doFWHM", default=False, action='store_true', help="Do FWHM")
   return parser.parse_args()
 (opt,args) = get_options()

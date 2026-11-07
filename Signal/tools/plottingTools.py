@@ -473,6 +473,12 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
 def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
+  fit_chi2 = {}
+  if getattr(_opt, 'fitChi2', None):
+      with open(_opt.fitChi2) as handle: fit_info = json.load(handle)
+      if fit_info['process'] != _opt.procs:
+          raise ValueError('Fit chi-square metadata does not match selected process')
+      fit_chi2 = fit_info['values'].get(_opt.cats, {})
   colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30, '2023preBPix':41, '2023postBPix':43}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
@@ -510,14 +516,17 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
       leg0.Draw("Same")
 
       # Middle legend: Per-year effective sigmas
-      leg1 = ROOT.TLegend(0.15 + offset, 0.38, 0.55 + offset, 0.66)
+      leg1 = ROOT.TLegend(0.15 + offset, 0.35 if fit_chi2 else 0.38, 0.55 + offset, 0.69 if fit_chi2 else 0.66)
       leg1.SetFillStyle(0)
       leg1.SetLineColor(0)
-      leg1.SetTextSize(0.022)
+      leg1.SetTextSize(0.021 if fit_chi2 else 0.022)
       leg1.SetMargin(0.12)  # Prevents dashed lines from drawing across the text
       for year in _opt.years.split(","):
           eff_sig = getEffSigma(_hists['pdf_%s' % year])
-          leg1.AddEntry(_hists['pdf_%s' % year], "%s: #sigma_{eff} = %1.2f GeV" % (year, eff_sig), "l")
+          year_label = "%s: #sigma_{eff} = %1.2f GeV" % (year, eff_sig)
+          if year in fit_chi2:
+              year_label = "#splitline{%s}{#chi^{2}/ndof = %.3f}" % (year_label, fit_chi2[year])
+          leg1.AddEntry(_hists['pdf_%s' % year], year_label, "l")
       leg1.Draw("Same")
 
       # Bottom legend: Total effective sigma band
@@ -633,18 +642,23 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
     lat1.DrawLatex(0.85,0.86,"%s"%translateCats[catStr])
   else:
     lat1.DrawLatex(0.85,0.86,"%s"%catStr)
+  if getattr(_opt, "procLabel", None): procStr = _opt.procLabel
   lat1.DrawLatex(0.83,0.8,"%s %s"%(procStr,yearStr))
+  if fit_chi2:
+    fit_note = ROOT.TLatex()
+    fit_note.SetNDC(); fit_note.SetTextFont(42); fit_note.SetTextSize(0.018)
+    fit_note.DrawLatex(0.16,0.17,"Per-era #chi^{2}: original MC fits")
+
 
   # drawCMS(onTop=True, CMSString="Simulation Private Work", sqrts=None)
 
   canv.Update()
 
   # Write effSigma to file
+  es = {'combined': effSigma}
   if len(_opt.years.split(",")) >1:
-    es = {}
-    es['combined'] = effSigma
     for year in _opt.years.split(","): es[year] = getEffSigma(_hists['pdf_%s'%year])
-    with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
+  with open("%s/effSigma_%s.json"%(_outdir,catExt),"w") as jf: json.dump(es,jf)
 
   # Save canvas
   canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))
