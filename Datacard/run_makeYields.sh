@@ -2,32 +2,36 @@
 # Extract yields only; never builds a datacard or starts a fit.
 set -eo pipefail
 base="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"; project="$(cd "$base/.." && pwd)"
-model=; out=; category=all; signal=; background="$project/Background/outdir_tth_th_analysis"; wsbase="$project/Trees2WS/workspaces/fiducial"; dry=0
+model=; out=; category=all; signal=; background="$project/Background/outdir_tth_th_analysis"; wsbase="$project/Trees2WS/workspaces/fiducial"; dry=0; years=2022preEE,2022postEE,2023preBPix,2023postBPix; stat_only=0
 usage() { cat <<'HELP'
 Usage: bash run_makeYields.sh --model DCB|SoG --outdir NEW_DIR [options]
  --category NAME|all   Default all categories found in signal packages
  --signal-dir DIR     Default ../Signal/packaged_all_years_20261014/MODEL
  --background-dir DIR Default ../Background/outdir_tth_th_analysis
  --ws-base DIR        Default ../Trees2WS/workspaces/fiducial
+ --years CSV          Explicit eras; default is the existing four 2022/2023 eras
+ --stat-only          Omit systematic extraction
  --dry-run            Print commands; no files written or calculations started
 Outputs: yields_MODEL/CATEGORY.pkl, logs/, commands.sh, manifest.json, exit_status.txt.
-Uses four eras, input mass 125, accEff, mergeYears, doSystematics, skipCOWCorr.
+Default: four eras, mass 125, accEff, mergeYears, doSystematics, skipCOWCorr.
+--years overrides the eras; --stat-only omits systematic extraction.
 Calculates categories sequentially. Existing output folders are never overwritten.
 HELP
 }
 while (( $# )); do
  case "$1" in
- --help|-h) usage;exit 0;; --dry-run) dry=1;shift;;
- --model|--outdir|--category|--signal-dir|--background-dir|--ws-base)
+ --help|-h) usage;exit 0;; --stat-only) stat_only=1;shift;; --dry-run) dry=1;shift;;
+ --model|--outdir|--category|--signal-dir|--background-dir|--ws-base|--years)
   (( $#>=2 )) || { echo "Missing value: $1" >&2;exit 2; }
-  case "$1" in --model) model="$2";;--outdir) out="$2";;--category) category="$2";;--signal-dir) signal="$2";;--background-dir) background="$2";;--ws-base) wsbase="$2";;esac;shift 2;;
+  case "$1" in --model) model="$2";;--outdir) out="$2";;--category) category="$2";;--signal-dir) signal="$2";;--background-dir) background="$2";;--ws-base) wsbase="$2";;--years) years="$2";;esac;shift 2;;
  *) echo "Unknown option: $1" >&2;exit 2;; esac
 done
 [[ "$model" == DCB || "$model" == SoG ]] && [[ -n "$out" ]] || { usage >&2;exit 2; }
 signal="${signal:-$project/Signal/packaged_all_years_20261014/$model}"
 signal="$(realpath -e "$signal")";background="$(realpath -e "$background")";wsbase="$(realpath -e "$wsbase")";out="$(realpath -m "$out")"
 [[ ! -e "$out" ]] || { echo "Output already exists: $out" >&2;exit 2; }
-map=;for era in 2022preEE 2022postEE 2023preBPix 2023postBPix;do
+IFS=, read -r -a eras <<< "$years"
+map=;for era in "${eras[@]}";do
  [[ -d "$wsbase/$era/ws_signal" ]] || { echo "Missing input workspace folder for $era" >&2;exit 2; }
  map+="${map:+,}$era=$wsbase/$era/ws_signal"
 done
@@ -48,24 +52,25 @@ if (( ! dry ));then
  mkdir -p "$(dirname "$out")";mkdir "$out";mkdir "$out/logs"
  cp "$base/run_makeYields.sh" "$out/executed_runner.sh"
  trap 'rc=$?; printf "%s\n" "$rc" > "$out/exit_status.txt"' EXIT
- python3 -B - "$out" "$model" "$signal" "$background" "$map" "${cats[@]}" <<'PY'
+ python3 -B - "$out" "$model" "$signal" "$background" "$map" "$years" "$stat_only" "${cats[@]}" <<'PY'
 import sys,json,pathlib,hashlib
-out,model,signal,background,wsmap,*cats=sys.argv[1:];base=pathlib.Path.cwd()
+out,model,signal,background,wsmap,years,stat_only,*cats=sys.argv[1:];base=pathlib.Path.cwd()
 names=['makeYields.py','systematics.py'];hashes={n:hashlib.sha256((base/n).read_bytes()).hexdigest() for n in names}
-pathlib.Path(out,'manifest.json').write_text(json.dumps(dict(model=model,signal_dir=signal,background_dir=background,input_ws_map=wsmap,categories=cats,input_mass=125,weight_scheme='accEff',skipCOWCorr=True,source_sha256=hashes),indent=2)+'\n')
+pathlib.Path(out,'manifest.json').write_text(json.dumps(dict(years=years.split(","),doSystematics=not bool(int(stat_only)),model=model,signal_dir=signal,background_dir=background,input_ws_map=wsmap,categories=cats,input_mass=125,weight_scheme='accEff',skipCOWCorr=True,source_sha256=hashes),indent=2)+'\n')
 PY
 fi
 for c in "${cats[@]}";do
- cmd=(python3 -B -u "$base/makeYields.py" --inputWSDirMap "$map" --cat "$c" --procs auto --ext "$model" --outputYieldsDir "$out" --mass 125 --mergeYears --doSystematics --skipCOWCorr --systWeightScheme accEff --sigModelWSDir "$signal" --sigModelExt "packaged_$model" --bkgModelWSDir "$background" --bkgModelExt multipdf)
+ cmd=(python3 -B -u "$base/makeYields.py" --inputWSDirMap "$map" --cat "$c" --procs auto --ext "$model" --outputYieldsDir "$out" --mass 125 --mergeYears --skipCOWCorr --systWeightScheme accEff --sigModelWSDir "$signal" --sigModelExt "packaged_$model" --bkgModelWSDir "$background" --bkgModelExt multipdf)
+ (( stat_only )) || cmd+=(--doSystematics)
  printf '%q ' "${cmd[@]}";printf '\n'
  if (( ! dry ));then
   printf '%q ' "${cmd[@]}" >> "$out/commands.sh";printf '\n' >> "$out/commands.sh"
   "${cmd[@]}" 2>&1 | tee "$out/logs/${c}.log"
   if rg -n '\[ERROR\]|\*\*\* ERROR|Traceback \(most recent call last\)' "$out/logs/${c}.log";then exit 1;fi
-  python3 -B - "$out/yields_$model/$c.pkl" "$c" <<'PY'
+  python3 -B - "$out/yields_$model/$c.pkl" "$c" "$years" <<'PY'
 import sys,pathlib,pandas as pd,numpy as np
-p,c=sys.argv[1:];d=pd.read_pickle(p);s=d[d.type=='sig'];assert len(s)>0 and set(s.cat)=={c}
-assert set(s.year)=={'2022preEE','2022postEE','2023preBPix','2023postBPix'}
+p,c,years=sys.argv[1:];d=pd.read_pickle(p);s=d[d.type=='sig'];assert len(s)>0 and set(s.cat)=={c}
+assert set(s.year)==set(years.split(","))
 cols=[n for n in s if n.endswith('_yield')]+['sumw2','numEvents'];a=s[cols].apply(pd.to_numeric,errors='raise');assert np.isfinite(a.to_numpy()).all()
 assert (a.sumw2>=0).all() and (a.numEvents>=0).all();assert (a.numEvents%1==0).all()
 assert all(pathlib.Path(f).is_file() for f in d.modelWSFile)
