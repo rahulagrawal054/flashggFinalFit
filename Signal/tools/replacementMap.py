@@ -370,3 +370,17 @@ globalReplacementMap["tth_th_analysis_fiducial_noDeco_SM_rates"] = od(
 ###################################################################################################################################################################################################
 ###################################################################################################################################################################################################
 ###################################################################################################################################################################################################
+
+# Hybrid categories must supply their own reviewed donors, never old-name guesses.
+from runConfig import load_run_config
+_hybrid_config = load_run_config()
+if _hybrid_config is not None:
+    _donors = _hybrid_config['donors']
+    _categories = _hybrid_config['categories']
+    if set(_donors) != set(_categories) or not _categories:
+        raise ValueError('Hybrid donors must cover exactly the configured categories')
+    globalReplacementMap['tth_th_analysis_hybrid_fiducial'] = od(
+        procWV=_hybrid_config['wv_donor']['process'],
+        catWV=_hybrid_config['wv_donor']['category'],
+        procRVMap=od((c, _donors[c]['process']) for c in _categories),
+        catRVMap=od((c, _donors[c]['category']) for c in _categories))

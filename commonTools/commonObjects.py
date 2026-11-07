@@ -62,7 +62,7 @@ BR_Z_qq = 69.91*0.01
 BR_W_qq = 67.41*0.01
 
 # List of years
-years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2022preBPix','2022postBPix']
+years_to_process = ['2016','2017','2018','2022preEE','2022postEE','2023preBPix','2023postBPix']
 # Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH', 'WH','ZH','bbH']
 decayMode = 'hgg'
@@ -197,3 +197,10 @@ combineVariableDict = {
     "Njets2p5": CreateVariableParameters(gen_variable="NJ", reco_variable="Njets2p5", bins=["0p0_1p0", "1p0_2p0", "2p0_3p0", "3p0_100p0"], year="2022", BMW=BMW),
     "ptJ0": CreateVariableParameters(gen_variable="PTJ0", reco_variable="first_jet_pt", bins=["0p0_30p0", "30p0_75p0", "75p0_120p0", "120p0_200p0", "200p0_10000p0"], year="2022", BMW=BMW)
 }
+
+# A new production supplies approved luminosities explicitly; old defaults stay intact.
+from runConfig import load_run_config
+_run_config = load_run_config()
+if _run_config is not None:
+    lumiMap.update(_run_config['lumi_fb'])
+    years_to_process = list(_run_config['lumi_fb'])

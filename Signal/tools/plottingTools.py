@@ -479,7 +479,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
       if fit_info['process'] != _opt.procs:
           raise ValueError('Fit chi-square metadata does not match selected process')
       fit_chi2 = fit_info['values'].get(_opt.cats, {})
-  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30, '2023preBPix':41, '2023postBPix':43}
+  colorMap = {'2016':38,'2017':30,'2018':46,'2022preEE':38,'2022postEE':30, '2023preBPix':41, '2023postBPix':43, '2024':46}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetBottomMargin(0.12)
   canv.SetLeftMargin(0.15)
@@ -583,7 +583,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.02):
   _hists['pdf'].Draw("Same Hist C")
   if len(_opt.years.split(","))>1 and _opt.plot_years_separate:
     for year in _opt.years.split(","):
-      _hists['pdf_%s'%year].SetLineColor( colorMap[year] )  
+      _hists['pdf_%s'%year].SetLineColor(colorMap.get(year, 46 + _opt.years.split(",").index(year)))
       _hists['pdf_%s'%year].SetLineStyle(2)
       _hists['pdf_%s'%year].SetLineWidth(2)
       _hists['pdf_%s'%year].Draw("Same Hist C")

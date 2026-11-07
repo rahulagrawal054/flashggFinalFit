@@ -234,3 +234,6 @@ globalXSBRMap["tth_th_analysis_fiducial_noDeco_SM_rates"] = _apply_sm_rates_to_f
     globalXSBRMap["tth_th_analysis_fiducial_noDeco"],
     globalXSBRMap["tth_th_analysis"],
 )
+
+# Same 13.6 TeV process definitions; categorization does not change XS*BR.
+globalXSBRMap['tth_th_analysis_hybrid_fiducial'] = globalXSBRMap['tth_th_analysis_fiducial']
