@@ -1302,3 +1302,100 @@ _extended_bsm_points = (
 for _cpl in _extended_bsm_points:
   models[f"r_2D_{_cpl}"] = _make_extended_bsm_2d_model(_cpl, fiducial=False)
   models[f"r_2D_{_cpl}_fiducial"] = _make_extended_bsm_2d_model(_cpl, fiducial=True)
+
+
+# -----------------------------------------------------------------------------
+# Explicit ttH/tH models for the current *_in_<era>_hgg / *_out_<era>_hgg cards.
+# Inclusive here means one strength scales IN+OUT; no _incl dataset is needed.
+# A fixed strength of 1 retains the existing nuisance uncertainties.
+# r_ttH names the tested strength: read the model name to see whether it scales
+# ttH only or the combined ttH+tHW contribution. The mappings are explicit below.
+# Multi-POI models make other strengths available; profiling is a FIT option.
+# For Significance use --redefineSignalPOIs r_ttH and --floatParameters with:
+#   r_tHq                  for a tHq-profiled model;
+#   r_tHq,r_tHW            for the independent three-strength model;
+#   r_tH                   for the common tH=tHq+tHW model.
+# The ranges reproduce the checked significance setups; no mass scan is added.
+# Category selection is separate from these process-normalization mappings.
+# -----------------------------------------------------------------------------
+models.update({
+  # ttH+tHW IN+OUT tested; tHq IN+OUT has a second strength.
+  "r_ttH_tHW_inclusive__tHq_inclusive_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/(tth|tHW)_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_(in|out)_.*:r_tHq[1,-25,25]"
+  """,
+
+  # ttH+tHW IN+OUT tested; tHq IN+OUT stays at strength 1.
+  "r_ttH_tHW_inclusive__tHq_fixed":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/(tth|tHW)_(in|out)_.*:r_ttH[1,0,5]"
+  """,
+
+  # ttH IN+OUT tested; tHW and tHq IN+OUT stay at strength 1.
+  "r_ttH_inclusive__tHW_tHq_fixed":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/tth_(in|out)_.*:r_ttH[1,0,5]"
+  """,
+
+  # ttH IN+OUT tested; tHW strength 1; tHq IN+OUT has its own strength.
+  "r_ttH_inclusive__tHW_fixed__tHq_inclusive_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/tth_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_(in|out)_.*:r_tHq[1,-25,25]"
+  """,
+
+  # ttH, tHW and tHq each have independent IN+OUT strengths.
+  "r_ttH_inclusive__tHW_tHq_inclusive_independent_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/tth_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_(in|out)_.*:r_tHq[1,-25,25]" \
+    --PO "map=.*/tHW_(in|out)_.*:r_tHW[1,-25,100]"
+  """,
+
+  # ttH IN+OUT tested; tHW+tHq IN+OUT share the common r_tH.
+  "r_ttH_inclusive__tH_inclusive_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/tth_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/(tHW|tHqHad|tHqLep)_(in|out)_.*:r_tH[1,-25,25]"
+  """,
+
+  # Fiducial baseline: ttH+tHW IN tested; tHq IN has its own strength; all OUT strengths 1.
+  "r_ttH_tHW_fiducial__tHq_fiducial_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/(tth|tHW)_in_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_in_.*:r_tHq[1,-25,25]"
+  """,
+
+  # Historical control: ttH+tHW IN+OUT tested; tHq IN floats; tHq OUT strength 1.
+  "r_ttH_tHW_inclusive__tHq_fiducial_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/(tth|tHW)_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_in_.*:r_tHq[1,-25,25]"
+  """,
+
+  # Historical control: ttH IN+OUT tested; tHW IN+OUT strength 1; tHq IN floats, OUT strength 1.
+  "r_ttH_inclusive__tHW_fixed__tHq_fiducial_profiled":
+  """-P HiggsAnalysis.CombinedLimit.PhysicsModel:multiSignalModel \
+    --PO "map=.*/.*:1" \
+    --PO "map=.*/tth_(in|out)_.*:r_ttH[1,0,5]" \
+    --PO "map=.*/tHq(Had|Lep)_in_.*:r_tHq[1,-25,25]"
+  """,
+
+})
+
+
+# Separate ttH-category fits use the two split cards in DCB/category_cards/.
+# These aliases use the current inclusive ttH+tHW / inclusive tHq definition.
+# IMPORTANT: the alias does not filter a full card. Use ONLY the corresponding
+# four-category datacard; its category selection makes the fit hadronic/leptonic.
+models["r_ttH_tHW_inclusive__tHq_inclusive_profiled__ttH_had"] = models["r_ttH_tHW_inclusive__tHq_inclusive_profiled"]
+models["r_ttH_tHW_inclusive__tHq_inclusive_profiled__ttH_lep"] = models["r_ttH_tHW_inclusive__tHq_inclusive_profiled"]
