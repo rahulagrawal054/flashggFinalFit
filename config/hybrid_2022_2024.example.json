@@ -1,0 +1,40 @@
+{
+  "tag": "hybrid_2022_2024_v001",
+  "lumi_fb": {
+    "2022preEE": 7.98,
+    "2022postEE": 26.67,
+    "2023preBPix": 18.063,
+    "2023postBPix": 9.693,
+    "2024": null
+  },
+  "ws_base": null,
+  "data_workspace": null,
+  "categories": [],
+  "donors": {},
+  "wv_donor": {
+    "process": null,
+    "category": null
+  },
+  "beamspot_cm": {
+    "2022preEE": {
+      "data": null,
+      "mc": null
+    },
+    "2022postEE": {
+      "data": null,
+      "mc": null
+    },
+    "2023preBPix": {
+      "data": null,
+      "mc": null
+    },
+    "2023postBPix": {
+      "data": null,
+      "mc": null
+    },
+    "2024": {
+      "data": null,
+      "mc": null
+    }
+  }
+}

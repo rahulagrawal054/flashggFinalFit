@@ -163,3 +163,7 @@ __pycache__/
 *.tif
 *.tiff
 *.pptx
+
+# New hybrid production: local settings, prepared runners and all results
+/config/hybrid_2022_2024.local.json
+/hybrid_runs/
