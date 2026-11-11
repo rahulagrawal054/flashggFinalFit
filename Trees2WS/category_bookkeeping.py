@@ -18,8 +18,10 @@ import sys
 
 # Same normalization convention and values as Trees2WS/calc_yields.py.
 # These factors assume input `weight` needs multiplication by lumi * XS * BR.
-LUMI = {'2022preEE': 7.98, '2022postEE': 26.68,
-        '2023preBPix': 17.96, '2023postBPix': 9.68}
+# Luminosities in fb^-1, aligned with commonTools/commonObjects.py::lumiMap;
+# 2024 = 109.95 fb^-1 (value confirmed by the analyst on 2026-11-11).
+LUMI = {'2022preEE': 7.98, '2022postEE': 26.67,
+        '2023preBPix': 18.063, '2023postBPix': 9.693, '2024': 109.95}
 XS_BR = {'GluGluH': 52.23e3 * 0.00227, 'VBFH': 4.078e3 * 0.00227,
          'VH': 2.4009e3 * 0.00227, 'ttH': 570.0 * 0.00227,
          'tHqLep': 83.26 * 0.3258 * 0.00227,
