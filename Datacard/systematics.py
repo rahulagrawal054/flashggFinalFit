@@ -119,6 +119,25 @@ experimental_systematics.extend([
   {'name':'weight_bTagSF_sys_lf','title':'CMS_hgg_bTagSF_sys_lf','type':'factory','prior':'lnN','correlateAcrossYears':1},
   {'name':'weight_bTagSF_sys_lfstats1','title':'CMS_hgg_bTagSF_sys_lfstats1','type':'factory','prior':'lnN','correlateAcrossYears':0},
   {'name':'weight_bTagSF_sys_lfstats2','title':'CMS_hgg_bTagSF_sys_lfstats2','type':'factory','prior':'lnN','correlateAcrossYears':0},
+  # ---------------------------------------------------------------------------------------------
+  # DRAFT (2026-11-11), NOT ACTIVE: b-tag scheme of the inputs_10Nov / workspaces_10Nov production.
+  # The 9 weight_bTagSF_sys_* entries above exist only in the 27June workspaces (0/40 inputs_10Nov
+  # files). inputs_10Nov provides fixed-WP style SFs, split into b/c and light flavour, each with a
+  # year-correlated part and a per-era part:
+  #   weight_btagSFbc_correlated, weight_btagSFlight_correlated        (all 5 eras)
+  #   weight_btagSFbc_<era>,      weight_btagSFlight_<era>             (only in that era's files)
+  # plus a weight_btagSFcomb_* source breakdown (correlated, uncorrelated, jes, jer, pileup, hdamp,
+  # topmass, type3, statistic, bfragmentation, ... ; cfragmentation/colorreconnection/pdf absent in
+  # 2024, isrdef/fsrdef/muf/mur/pdfas only in 2024). Use EITHER bc/light OR the comb breakdown, not both
+  # (double counting). Proposed bc/light set:
+  # {'name':'weight_btagSFbc_correlated','title':'CMS_btag_fixedWP_comb_bc_correlated','type':'factory','prior':'lnN','correlateAcrossYears':1},
+  # {'name':'weight_btagSFlight_correlated','title':'CMS_btag_fixedWP_incl_light_correlated','type':'factory','prior':'lnN','correlateAcrossYears':1},
+  # {'name':'weight_btagSFbc_YEAR','title':'CMS_btag_fixedWP_comb_bc_uncorrelated','type':'factory','prior':'lnN','correlateAcrossYears':0},
+  # {'name':'weight_btagSFlight_YEAR','title':'CMS_btag_fixedWP_incl_light_uncorrelated','type':'factory','prior':'lnN','correlateAcrossYears':0},
+  # The last two need YEAR -> era substitution of the weight name, which calcSystematics.py does not
+  # support yet (a weight missing from one era's workspace currently aborts unless --ignore-warnings).
+  # Swap the 9 entries above for this set when moving to the 10Nov workspaces with systematics.
+  # ---------------------------------------------------------------------------------------------
   # ggH/VBF-specific Higgs+heavy-flavor variations (separate NPs per production mode)
   {'name':'weight_Higgs_plus_b_syst_ggH','weight_name':'weight_Higgs_plus_b_syst','proc_match':'ggh','title':'CMS_hgg_Higgs_plus_b_syst_ggH','type':'factory','prior':'lnN','correlateAcrossYears':1},
   {'name':'weight_Higgs_plus_c_syst_ggH','weight_name':'weight_Higgs_plus_c_syst','proc_match':'ggh','title':'CMS_hgg_Higgs_plus_c_syst_ggH','type':'factory','prior':'lnN','correlateAcrossYears':1},
