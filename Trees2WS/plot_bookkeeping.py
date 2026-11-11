@@ -18,7 +18,7 @@ import numpy as np
 
 PROCESS_ORDER = ['ttH', 'tHqHad', 'tHqLep', 'tHW', 'GluGluH', 'VBFH', 'VH', 'bbH']
 PROCESS_COLORS = ['#4477AA', '#228833', '#66CCEE', '#AA3377', '#EE6677', '#CCBB44', '#BBBBBB', '#000000']
-ERA_ORDER = ['2022preEE', '2022postEE', '2023preBPix', '2023postBPix']
+ERA_ORDER = ['2022preEE', '2022postEE', '2023preBPix', '2023postBPix', '2024']
 ERA_COLORS = ['#4477AA', '#66CCEE', '#EE6677', '#AA3377']
 
 
